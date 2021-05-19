@@ -176,6 +176,7 @@ void main(){
     int32 velocityIterations = 6;
     int32 positionIterations = 2;
 
+    /*
     for (int32 i = 0; i < 60; ++i)
     {
         world.Step(timeStep, velocityIterations, positionIterations);
@@ -183,8 +184,9 @@ void main(){
         float angle = body->GetAngle();
         printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
     }
+    */
 
-    
+    char msg[DEFAULT_BUFLEN];
     Server server = Server();
     if(server.setup_server()){
         printf("Server setup failed...");
@@ -193,19 +195,30 @@ void main(){
     // Receive until the peer shuts down the connection
     do {
 
+
         server.iResult = recv(server.ClientSocket, server.recvbuf, server.recvbuflen, 0);
         if (server.iResult > 0) {
             printf("Bytes received: %d\n", server.iResult);
 
-        // Echo the buffer back to the sender
-            server.iSendResult = send( server.ClientSocket, server.recvbuf, server.iResult, 0 );
-            if (server.iSendResult == SOCKET_ERROR) {
-                printf("send failed with error: %d\n", WSAGetLastError());
-                closesocket(server.ClientSocket);
-                WSACleanup();
-                return;
+            if(server.recvbuf[0] == 's'){
+                printf("Sending world state...\n");
+
+                world.Step(timeStep, velocityIterations, positionIterations);
+                b2Vec2 position = body->GetPosition();
+                float angle = body->GetAngle();
+                sprintf_s(msg,"%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
+                printf(msg);
+
+                // Echo the buffer back to the sender
+                server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );
+                if (server.iSendResult == SOCKET_ERROR) {
+                    printf("send failed with error: %d\n", WSAGetLastError());
+                    closesocket(server.ClientSocket);
+                    WSACleanup();
+                    return;
+                }
+                printf("Bytes sent: %d\n", server.iSendResult);
             }
-            printf("Bytes sent: %d\n", server.iSendResult);
         }
         else if (server.iResult == 0)
             printf("Connection closing...\n");

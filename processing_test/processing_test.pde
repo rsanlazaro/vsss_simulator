@@ -27,7 +27,7 @@ void setup()
 
 void draw() 
 {
-  c.write("que pedo\n");
+  c.write("s\n");
   // Receive data from server
   if (c.available() > 0) {
     input = c.readString();
