@@ -192,9 +192,47 @@ void main(){
     //Get field points
     vector <pair<float, float>> plist = field.get_point_list();
     
-    b2Vec2 gravity(0.0f, -10.0f);
+    b2Vec2 gravity(0.0f, 0.0f);
     b2World world(gravity);
 
+    const int field_points = 16;
+    assert(field_points == plist.size());
+    b2Vec2 vs[field_points];
+
+    for(int i = 0; i < field_points; ++i){
+        vs[i].Set(plist[i].first, plist[i].second);
+    }
+    
+    b2ChainShape chain;
+    chain.CreateLoop(vs, field_points);
+
+    //Ball Shape
+    b2CircleShape circle;
+    //circle.m_p.Set(0.0f, 0.0f);
+    circle.m_radius = 0.1f;
+
+    //Ball dynamic body
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+
+    bodyDef.position.Set(0.0f, 0.0f); // the body's origin position.
+    bodyDef.angle = 0.0f; // the body's angle in radians.
+
+    bodyDef.linearDamping = 0.1f;
+    bodyDef.angularDamping = 0.01f;
+
+    b2Body* body = world.CreateBody(&bodyDef);
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &circle;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 0.3f;
+    fixtureDef.restitution = 0.8f;
+    body->CreateFixture(&fixtureDef);
+
+
+
+
+    /*
     b2BodyDef groundBodyDef;
     groundBodyDef.position.Set(0.0f, -10.0f);
     
@@ -219,6 +257,7 @@ void main(){
     fixtureDef.friction = 0.3f;
 
     body->CreateFixture(&fixtureDef);
+    */
 
     float timeStep = 1.0f / 60.0f;
 
@@ -272,11 +311,27 @@ void main(){
                 printf("Sending field coordinates...\n");
 
                 msg[0] = '\0';
-                for(int i = 0; i < 16; ++i){
+                for(int i = 0; i < plist.size(); ++i){
                     sprintf_s(aux,"%4.2f %4.2f ", plist[i].first, plist[i].second);
                     strcat_s(msg, aux);
                 } strcat_s(msg, "\n");
                 printf(msg); 
+
+                // Echo the buffer back to the sender
+                server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );
+                if (server.iSendResult == SOCKET_ERROR) {
+                    printf("send failed with error: %d\n", WSAGetLastError());
+                    closesocket(server.ClientSocket);
+                    WSACleanup();
+                    return;
+                }
+                printf("Bytes sent: %d\n", server.iSendResult);
+            } else if(server.recvbuf[0] == 'b'){
+                printf("Sending ball definition...\n");
+
+                b2Vec2 position = body->GetPosition();
+                sprintf_s(msg,"%4.2f %4.2f %4.2f\n", circle.m_radius, position.x, position.y);
+                printf(msg);
 
                 // Echo the buffer back to the sender
                 server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );

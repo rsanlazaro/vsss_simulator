@@ -18,6 +18,8 @@ Point field_p[] = new Point[16];
 Point center;
 
 boolean firstTime = true;
+float ball_radius;
+Point ball_pos;
 
 void setup() 
 {
@@ -45,7 +47,19 @@ void setup()
     }
   }
   
-  
+  //Get ball definition
+  println("Requesting ball definition...");
+  c.write("b\n");
+  // Receive data from server
+  delay(100);
+  if (c.available() > 0) {
+    input = c.readString();
+    input = input.substring(0, input.indexOf("\n"));
+    data = float(split(input, ' '));
+    println(data);
+    ball_radius = data[0]*200;
+    ball_pos = new Point(data[1]*200+center.x, data[2]*200+center.y);
+  }
 }
 
 void draw() 
@@ -87,4 +101,10 @@ void draw()
     //}
   }
   center._draw();
+  
+  stroke(0);
+  strokeWeight(1);
+  circle(ball_pos.x, ball_pos.y, ball_radius*2);
+  
+  
 }
