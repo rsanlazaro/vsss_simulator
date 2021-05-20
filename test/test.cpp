@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -141,7 +142,55 @@ class Server{
         } 
 };
 
+class Field{
+    float width;
+    float height;
+    float goal_height_percentage;
+    float goal_width_percentage;
+    float corner_height_percentage; 
+
+    public:
+        Field(const float &_width, const float &_height, const float &goal_h_p, const float &goal_w_p, const float &corner_h_p){
+            width  = _width;
+            height = _height;
+            goal_height_percentage = goal_h_p;
+            goal_width_percentage  = goal_w_p;
+            corner_height_percentage = corner_h_p;
+        }
+        vector <pair<float, float>> get_point_list(){
+            vector <pair<float, float>> plist(16); 
+            float mid_width = width / 2.0f;
+            float mid_height = height / 2.0f;
+            float corner_offset = height * corner_height_percentage;
+            float goal_height_offset = (height * goal_height_percentage) / 2.0f;
+            float goal_width_offset = (width * goal_width_percentage);
+
+            plist[0] = {-mid_width, mid_height-corner_offset};
+            plist[1] = {-mid_width+corner_offset, mid_height};
+            plist[2] = {mid_width-corner_offset, mid_height};
+            plist[3] = {mid_width, mid_height-corner_offset};
+            plist[4] = {mid_width, goal_height_offset};
+            plist[5] = {mid_width+goal_width_offset, goal_height_offset};
+            plist[6] = {mid_width+goal_width_offset, -goal_height_offset};
+            plist[7] = {mid_width, -goal_height_offset};
+            plist[8] = {mid_width, -mid_height+corner_offset};
+            plist[9] = {mid_width-corner_offset, -mid_height};
+            plist[10] = {-mid_width+corner_offset, -mid_height};
+            plist[11] = {-mid_width, -mid_height+corner_offset};
+            plist[12] = {-mid_width, -goal_height_offset};
+            plist[13] = {-mid_width-goal_width_offset, -goal_height_offset};
+            plist[14] = {-mid_width-goal_width_offset, goal_height_offset};
+            plist[15] = {-mid_width, goal_height_offset};
+            return plist;
+        }
+};
+
 void main(){
+
+    //Field declaration
+    Field field = Field(3.0f, 2.5f, 0.33f, 0.1f, 0.05f);
+    //Get field points
+    vector <pair<float, float>> plist = field.get_point_list();
     
     b2Vec2 gravity(0.0f, -10.0f);
     b2World world(gravity);
@@ -187,6 +236,7 @@ void main(){
     */
 
     char msg[DEFAULT_BUFLEN];
+    char aux[DEFAULT_BUFLEN];
     Server server = Server();
     if(server.setup_server()){
         printf("Server setup failed...");
@@ -208,6 +258,25 @@ void main(){
                 float angle = body->GetAngle();
                 sprintf_s(msg,"%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
                 printf(msg);
+
+                // Echo the buffer back to the sender
+                server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );
+                if (server.iSendResult == SOCKET_ERROR) {
+                    printf("send failed with error: %d\n", WSAGetLastError());
+                    closesocket(server.ClientSocket);
+                    WSACleanup();
+                    return;
+                }
+                printf("Bytes sent: %d\n", server.iSendResult);
+            } else if(server.recvbuf[0] == 'f'){
+                printf("Sending field coordinates...\n");
+
+                msg[0] = '\0';
+                for(int i = 0; i < 16; ++i){
+                    sprintf_s(aux,"%4.2f %4.2f ", plist[i].first, plist[i].second);
+                    strcat_s(msg, aux);
+                } strcat_s(msg, "\n");
+                printf(msg); 
 
                 // Echo the buffer back to the sender
                 server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );
