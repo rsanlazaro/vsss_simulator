@@ -15,10 +15,13 @@ Client c;
 String input;
 float data[];
 Point field_p[] = new Point[16];
-Point center;
+
 
 float ball_radius;
 Point ball_pos;
+
+Point center;
+Box2DTransform box2dtransform;
 
 void setup() 
 {
@@ -26,10 +29,13 @@ void setup()
   background(204);
   stroke(0);
   frameRate(30); // Slow it down a little
+  
+  center = new Point(width / 2.0, height / 2.0);
+  box2dtransform = new Box2DTransform(200, center);
+  
   // Connect to the server's IP address and port
   c = new Client(this, "127.0.0.1", 27015); // Replace with your server's IP and port
   
-  center = new Point(width / 2.0, height / 2.0);
   //Get simulator field coordinates
   println("Requesting field coordinates...");
   c.write("f\n");
@@ -41,7 +47,7 @@ void setup()
     data = float(split(input, ' '));
     println(data);
     for(int i = 0; i < 16; ++i){
-      field_p[i] = new Point(data[i*2]*200+center.x,-data[i*2+1]*200+center.y);
+      field_p[i] = box2dtransform.transform_point(new Point(data[i*2], data[i*2+1]));
       field_p[i]._print();
     }
   }
@@ -56,8 +62,8 @@ void setup()
     input = input.substring(0, input.indexOf("\n"));
     data = float(split(input, ' '));
     println(data);
-    ball_radius = data[0]*200;
-    ball_pos = new Point(data[1]*200+center.x, -data[2]*200+center.y);
+    ball_radius = box2dtransform.transform_scalar(data[0]);
+    ball_pos = box2dtransform.transform_point(new Point(data[1], data[2]));
   }
 }
 
@@ -73,7 +79,7 @@ void draw()
     println(input);
     data = float(split(input, ' '));
     println(data);
-    ball_pos = new Point(data[0]*200+center.x, -data[1]*200+center.y);
+    ball_pos = box2dtransform.transform_point(new Point(data[0], data[1]));
   }
   
   fill(255,0,255);
