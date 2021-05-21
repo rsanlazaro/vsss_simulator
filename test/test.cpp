@@ -25,7 +25,8 @@ using namespace std;
 #define DEFAULT_PORT "27015"
 
 class Server{
-    public:
+    
+    private:
         WSADATA wsaData;
         int iResult;
 
@@ -38,13 +39,6 @@ class Server{
         int iSendResult;
         char recvbuf[DEFAULT_BUFLEN];
         int recvbuflen;
-
-        Server(){
-            ListenSocket = INVALID_SOCKET;
-            ClientSocket = INVALID_SOCKET;
-            result = NULL;
-            recvbuflen = DEFAULT_BUFLEN;
-        }
 
         int initialize_winsock(){
             // Initialize Winsock
@@ -119,6 +113,26 @@ class Server{
             closesocket(ListenSocket);
             return 0;
         }
+
+    public:
+        Server(){
+            ListenSocket = INVALID_SOCKET;
+            ClientSocket = INVALID_SOCKET;
+            result = NULL;
+            recvbuflen = DEFAULT_BUFLEN;
+        }
+
+        int get_send_result(){
+            return iSendResult;
+        }
+        void set_send_result(int result){
+            iSendResult = result;
+        }
+        char* get_message_data(){
+            return recvbuf;
+        }
+
+        
         int setup_server(){
             if(initialize_winsock()) return 1;
             if(resolve_server_address_and_port()) return 1;
@@ -142,7 +156,25 @@ class Server{
             closesocket(ClientSocket);
             WSACleanup();
             return 0;
-        } 
+        }
+        void close_socket_with_error(){
+            printf("recv failed with error: %d\n", WSAGetLastError());
+            closesocket(ClientSocket);
+            WSACleanup();
+        }
+        int send_message(char *msg){
+            iSendResult = send( ClientSocket, msg, (int)strlen(msg), 0 );
+            if (iSendResult == SOCKET_ERROR) {
+                printf("send failed with error: %d\n", WSAGetLastError());
+                closesocket(ClientSocket);
+                WSACleanup();
+                return 1;
+            }
+            return 0;
+        }
+        void read_message(){
+            iSendResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+        }
 };
 
 
@@ -286,12 +318,12 @@ void main(){
     // Receive until the peer shuts down the connection
     do {
 
+        server.read_message();
+        if (server.get_send_result() > 0) {
+            printf("Bytes received: %d\n", server.get_send_result());
 
-        server.iResult = recv(server.ClientSocket, server.recvbuf, server.recvbuflen, 0);
-        if (server.iResult > 0) {
-            printf("Bytes received: %d\n", server.iResult);
-
-            if(server.recvbuf[0] == 's'){
+            char *data = server.get_message_data();
+            if(data[0] == 's'){
                 printf("Sending world state...\n");
 
                 world.Step(timeStep, velocityIterations, positionIterations);
@@ -300,16 +332,9 @@ void main(){
                 sprintf_s(msg,"%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
                 printf(msg);
 
-                // Echo the buffer back to the sender
-                server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );
-                if (server.iSendResult == SOCKET_ERROR) {
-                    printf("send failed with error: %d\n", WSAGetLastError());
-                    closesocket(server.ClientSocket);
-                    WSACleanup();
-                    return;
-                }
-                printf("Bytes sent: %d\n", server.iSendResult);
-            } else if(server.recvbuf[0] == 'f'){
+                server.send_message(msg);
+                printf("Bytes sent: %d\n", server.get_send_result());
+            } else if(data[0] == 'f'){
                 printf("Sending field coordinates...\n");
 
                 msg[0] = '\0';
@@ -319,43 +344,27 @@ void main(){
                 } strcat_s(msg, "\n");
                 printf(msg); 
 
-                // Echo the buffer back to the sender
-                server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );
-                if (server.iSendResult == SOCKET_ERROR) {
-                    printf("send failed with error: %d\n", WSAGetLastError());
-                    closesocket(server.ClientSocket);
-                    WSACleanup();
-                    return;
-                }
-                printf("Bytes sent: %d\n", server.iSendResult);
-            } else if(server.recvbuf[0] == 'b'){
+                server.send_message(msg);
+                printf("Bytes sent: %d\n", server.get_send_result());
+            } else if(data[0] == 'b'){
                 printf("Sending ball definition...\n");
 
                 b2Vec2 position = body->GetPosition();
                 sprintf_s(msg,"%4.2f %4.2f %4.2f\n", circle.m_radius, position.x, position.y);
                 printf(msg);
 
-                // Echo the buffer back to the sender
-                server.iSendResult = send( server.ClientSocket, msg, (int)strlen(msg), 0 );
-                if (server.iSendResult == SOCKET_ERROR) {
-                    printf("send failed with error: %d\n", WSAGetLastError());
-                    closesocket(server.ClientSocket);
-                    WSACleanup();
-                    return;
-                }
-                printf("Bytes sent: %d\n", server.iSendResult);
+                server.send_message(msg);
+                printf("Bytes sent: %d\n", server.get_send_result());
             }
         }
-        else if (server.iResult == 0)
+        else if (server.get_send_result() == 0)
             printf("Connection closing...\n");
         else  {
-            printf("recv failed with error: %d\n", WSAGetLastError());
-            closesocket(server.ClientSocket);
-            WSACleanup();
+            server.close_socket_with_error();
             return;
         }
 
-    } while (server.iResult > 0);
+    } while (server.get_send_result() > 0);
 
     if(server.shutdown_server()){
         printf("Server shutdown failed...");
