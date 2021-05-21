@@ -17,7 +17,6 @@ float data[];
 Point field_p[] = new Point[16];
 Point center;
 
-boolean firstTime = true;
 float ball_radius;
 Point ball_pos;
 
@@ -26,7 +25,7 @@ void setup()
   size(800, 800);
   background(204);
   stroke(0);
-  frameRate(5); // Slow it down a little
+  frameRate(30); // Slow it down a little
   // Connect to the server's IP address and port
   c = new Client(this, "127.0.0.1", 27015); // Replace with your server's IP and port
   
@@ -58,30 +57,25 @@ void setup()
     data = float(split(input, ' '));
     println(data);
     ball_radius = data[0]*200;
-    ball_pos = new Point(data[1]*200+center.x, data[2]*200+center.y);
+    ball_pos = new Point(data[1]*200+center.x, -data[2]*200+center.y);
   }
 }
 
 void draw() 
 {
-  if(firstTime){
-    
-    
-    
-    firstTime = false;
-  }
   
-  /*
+  background(204);
   c.write("s\n");
   // Receive data from server
   if (c.available() > 0) {
     input = c.readString();
     input = input.substring(0, input.indexOf("\n"));
-    print(input);
+    println(input);
     data = float(split(input, ' '));
-    //println(data);
+    println(data);
+    ball_pos = new Point(data[0]*200+center.x, -data[1]*200+center.y);
   }
-  */
+  
   fill(255,0,255);
   strokeWeight(3);
   

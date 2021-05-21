@@ -206,6 +206,19 @@ void main(){
     b2ChainShape chain;
     chain.CreateLoop(vs, field_points);
 
+    b2BodyDef groundBodyDef;
+    groundBodyDef.type = b2_staticBody;
+    groundBodyDef.position.Set(0.0f, 0.0f);
+
+    b2Body* borders = world.CreateBody(&groundBodyDef);
+
+    b2FixtureDef groundFixtureDef;
+    groundFixtureDef.shape = &chain;
+    //groundFixtureDef.density = 10.0f;
+    groundFixtureDef.friction = 0.0f;
+    groundFixtureDef.restitution = 1.0f;
+    borders->CreateFixture(&groundFixtureDef);
+
     //Ball Shape
     b2CircleShape circle;
     //circle.m_p.Set(0.0f, 0.0f);
@@ -217,17 +230,38 @@ void main(){
 
     bodyDef.position.Set(0.0f, 0.0f); // the body's origin position.
     bodyDef.angle = 0.0f; // the body's angle in radians.
-
+    bodyDef.fixedRotation = true;
     bodyDef.linearDamping = 0.1f;
-    bodyDef.angularDamping = 0.01f;
+    //bodyDef.angularDamping = 0.01f;
 
     b2Body* body = world.CreateBody(&bodyDef);
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &circle;
     fixtureDef.density = 1.0f;
-    fixtureDef.friction = 0.3f;
-    fixtureDef.restitution = 0.8f;
+    fixtureDef.friction = 0.0f;
+    fixtureDef.restitution = 1.0f;
     body->CreateFixture(&fixtureDef);
+
+    b2Vec2 force(5.8f, 5.2f);
+    b2Vec2 point(0.0f, 0.0f);
+    body->ApplyForce(force, point, true);
+
+    //Robot body
+    b2BodyDef robotBodyDef;
+    robotBodyDef.type = b2_dynamicBody;
+    robotBodyDef.position.Set(0.0f, 4.0f);
+    b2Body* robotBody = world.CreateBody(&robotBodyDef);
+
+
+    b2PolygonShape dynamicBox;
+    dynamicBox.SetAsBox(0.2f, 0.2f);
+
+    b2FixtureDef robotFixtureDef;
+    robotFixtureDef.shape = &dynamicBox;
+    robotFixtureDef.density = 5.0f;
+    robotFixtureDef.friction = 0.3f;
+
+    robotBody->CreateFixture(&robotFixtureDef);
 
 
 
@@ -260,9 +294,16 @@ void main(){
     */
 
     float timeStep = 1.0f / 60.0f;
-
+    /*
     int32 velocityIterations = 6;
     int32 positionIterations = 2;
+    */
+
+    int32 velocityIterations = 10;
+    int32 positionIterations = 8;
+
+
+
 
     /*
     for (int32 i = 0; i < 60; ++i)
