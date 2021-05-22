@@ -20,6 +20,10 @@ Point field_p[] = new Point[16];
 float ball_radius;
 Point ball_pos;
 
+Point robot_pos;
+float robot_angle;
+float hx, hy;
+
 Point center;
 Box2DTransform box2dtransform;
 
@@ -38,7 +42,7 @@ void setup()
   
   //Get simulator field coordinates
   println("Requesting field coordinates...");
-  c.write("f\n");
+  c.write("f\n\0");
   // Receive data from server
   delay(100);
   if (c.available() > 0) {
@@ -54,7 +58,7 @@ void setup()
   
   //Get ball definition
   println("Requesting ball definition...");
-  c.write("b\n");
+  c.write("b\n\0");
   // Receive data from server
   delay(100);
   if (c.available() > 0) {
@@ -65,13 +69,28 @@ void setup()
     ball_radius = box2dtransform.transform_scalar(data[0]);
     ball_pos = box2dtransform.transform_point(new Point(data[1], data[2]));
   }
+  
+  //Get robot definition
+  println("Requesting robot definition...");
+  c.write("r\n\0");
+  // Receive data from server
+  delay(1000);
+  if (c.available() > 0) {
+    input = c.readString();
+    input = input.substring(0, input.indexOf("\n"));
+    data = float(split(input, ' '));
+    println(data);
+    hx = box2dtransform.transform_scalar(data[0]);
+    hy = box2dtransform.transform_scalar(data[1]);
+    robot_pos = box2dtransform.transform_point(new Point(data[2], data[3]));
+  }
 }
 
 void draw() 
 {
   
   background(204);
-  c.write("s\n");
+  c.write("s\n\0");
   // Receive data from server
   if (c.available() > 0) {
     input = c.readString();
@@ -80,6 +99,9 @@ void draw()
     data = float(split(input, ' '));
     println(data);
     ball_pos = box2dtransform.transform_point(new Point(data[0], data[1]));
+    robot_pos = box2dtransform.transform_point(new Point(data[3], data[4]));
+    robot_pos._print();
+    robot_angle = data[5];
   }
   
   fill(255,0,255);
@@ -105,6 +127,10 @@ void draw()
   stroke(0);
   strokeWeight(1);
   circle(ball_pos.x, ball_pos.y, ball_radius*2);
-  
+  pushMatrix();
+  translate(robot_pos.x, robot_pos.y);
+  rotate(robot_angle);
+  rect(-hx, -hy, hx*2, hy*2);
+  popMatrix();
   
 }

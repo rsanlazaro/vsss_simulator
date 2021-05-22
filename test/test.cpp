@@ -67,7 +67,7 @@ void main(){
     b2Body* body = world.CreateBody(&bodyDef);
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &circle;
-    fixtureDef.density = 1.0f;
+    fixtureDef.density = 0.25f;
     fixtureDef.friction = 0.0f;
     fixtureDef.restitution = 1.0f;
     body->CreateFixture(&fixtureDef);
@@ -75,24 +75,29 @@ void main(){
     b2Vec2 force(5.8f, 5.2f);
     b2Vec2 point(0.0f, 0.0f);
     body->ApplyForce(force, point, true);
-
+    
     //Robot body
     b2BodyDef robotBodyDef;
     robotBodyDef.type = b2_dynamicBody;
-    robotBodyDef.position.Set(0.0f, 4.0f);
+    robotBodyDef.position.Set(-0.8f, 0.5f);
     b2Body* robotBody = world.CreateBody(&robotBodyDef);
 
 
     b2PolygonShape dynamicBox;
-    dynamicBox.SetAsBox(0.2f, 0.2f);
+    float hx = 0.2f;
+    float hy = 0.2f;
+    dynamicBox.SetAsBox(hx, hy);
 
     b2FixtureDef robotFixtureDef;
     robotFixtureDef.shape = &dynamicBox;
     robotFixtureDef.density = 5.0f;
-    robotFixtureDef.friction = 0.3f;
+    robotFixtureDef.friction = 0.5f;
 
     robotBody->CreateFixture(&robotFixtureDef);
 
+    b2Vec2 robotForce(30.8f, 35.2f);
+    b2Vec2 robotPoint(-0.75f, 0.5f);
+    robotBody->ApplyForce(robotForce, robotPoint, true);
 
 
 
@@ -160,13 +165,17 @@ void main(){
             printf("Bytes received: %d\n", server.get_send_result());
 
             char *data = server.get_message_data();
+            printf("data received: %s\n", data);
             if(data[0] == 's'){
                 printf("Sending world state...\n");
 
                 world.Step(timeStep, velocityIterations, positionIterations);
                 b2Vec2 position = body->GetPosition();
                 float angle = body->GetAngle();
-                sprintf_s(msg,"%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
+
+                b2Vec2 robotPosition = robotBody->GetPosition();
+                float robotAngle = robotBody->GetAngle();
+                sprintf_s(msg,"%4.2f %4.2f %4.2f %4.2f %4.2f %4.2f\n", position.x, position.y, angle, robotPosition.x, robotPosition.y, robotAngle);
                 printf(msg);
 
                 server.send_message(msg);
@@ -188,6 +197,19 @@ void main(){
 
                 b2Vec2 position = body->GetPosition();
                 sprintf_s(msg,"%4.2f %4.2f %4.2f\n", circle.m_radius, position.x, position.y);
+                printf(msg);
+
+                server.send_message(msg);
+                printf("Bytes sent: %d\n", server.get_send_result());
+            } else if(data[0] == 'r'){
+                printf("Sending robot definition...\n");
+
+                for(int i = 0; i < dynamicBox.m_count; ++i){
+                    printf("%4.2f %4.2f\n", dynamicBox.m_vertices[i].x, dynamicBox.m_vertices[i].y);
+                }
+
+                b2Vec2 position = robotBody->GetPosition();
+                sprintf_s(msg,"%4.2f %4.2f %4.2f %4.2f\n", hx, hy, position.x, position.y);
                 printf(msg);
 
                 server.send_message(msg);
