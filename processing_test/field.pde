@@ -3,11 +3,13 @@ class Field{
   Point[] main_area;
   Point[] small_area_left;
   Point[] small_area_right;
+  Point[] mid_line;
   Field(float data[], Box2DTransform box2dtransform){
     box2D_borders    = new Point[16];
     main_area        = new Point[4];
     small_area_left  = new Point[4];
     small_area_right = new Point[4];
+    mid_line         = new Point[2];
     for(int i = 0; i < 16; ++i){
       box2D_borders[i] = box2dtransform.transform_point(new Point(data[i*2], data[i*2+1]));
     }
@@ -19,6 +21,9 @@ class Field{
     }
     for(int i = 24; i < 28; ++i){
       small_area_right[i-24] = box2dtransform.transform_point(new Point(data[i*2], data[i*2+1]));
+    }
+    for(int i = 28; i < 30; ++i){
+      mid_line[i-28] = box2dtransform.transform_point(new Point(data[i*2], data[i*2+1]));
     }
   }
   void draw_shape(Point[] shape){
@@ -34,5 +39,6 @@ class Field{
     draw_shape(main_area);
     draw_shape(small_area_left);
     draw_shape(small_area_right);
+    draw_shape(mid_line);
   }
 };

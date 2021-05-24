@@ -200,6 +200,10 @@ void main(){
                     sprintf_s(aux,"%4.2f %4.2f ", field.small_area_right[i].first, field.small_area_right[i].second);
                     strcat_s(msg, aux);
                 } 
+                for(int i = 0; i < field.mid_line.size(); ++i){
+                    sprintf_s(aux,"%4.2f %4.2f ", field.mid_line[i].first, field.mid_line[i].second);
+                    strcat_s(msg, aux);
+                } 
                 strcat_s(msg, "\n");
                 printf(msg); 
                 server.send_message(msg);

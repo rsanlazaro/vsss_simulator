@@ -27,6 +27,11 @@ void Field::calculate_points(){
     main_area[2] = {mid_width, -mid_height};
     main_area[3] = {-mid_width, -mid_height};
 
+    mid_line = std::vector <std::pair<float, float>>(2);
+
+    mid_line[0] = {0.f, mid_height};
+    mid_line[1] = {0.f, -mid_height};
+
     small_area_left = std::vector <std::pair<float, float>>(4);
 
     small_area_left[0] = {-mid_width, small_area_height_offset};
