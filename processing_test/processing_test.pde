@@ -14,8 +14,6 @@ import processing.net.*;
 Client c;
 String input;
 float data[];
-Point field_p[] = new Point[16];
-
 
 float ball_radius;
 Point ball_pos;
@@ -26,16 +24,17 @@ float hx, hy;
 
 Point center;
 Box2DTransform box2dtransform;
+Field field;
 
 void setup() 
 {
-  size(800, 800);
+  size(1500, 1000);
   background(204);
   stroke(0);
-  frameRate(30); // Slow it down a little
+  frameRate(60); // Slow it down a little
   
   center = new Point(width / 2.0, height / 2.0);
-  box2dtransform = new Box2DTransform(200, center);
+  box2dtransform = new Box2DTransform(150, center);
   
   // Connect to the server's IP address and port
   c = new Client(this, "127.0.0.1", 27015); // Replace with your server's IP and port
@@ -50,10 +49,7 @@ void setup()
     input = input.substring(0, input.indexOf("\n"));
     data = float(split(input, ' '));
     println(data);
-    for(int i = 0; i < 16; ++i){
-      field_p[i] = box2dtransform.transform_point(new Point(data[i*2], data[i*2+1]));
-      field_p[i]._print();
-    }
+    field = new Field(data, box2dtransform);
   }
   
   //Get ball definition
@@ -108,20 +104,8 @@ void draw()
   strokeWeight(3);
   
 
-  noFill();
-  beginShape();
+  field._draw();
   
-  for(int i = 0; i < 16; ++i){
-    vertex(field_p[i].x, field_p[i].y);
-  }
-  
-  endShape(CLOSE);
-  
-  for(int i = 0; i < 16; ++i){
-    //if(i <= 4){
-    field_p[i]._draw();
-    //}
-  }
   center._draw();
   
   stroke(0);
