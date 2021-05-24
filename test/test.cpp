@@ -21,21 +21,17 @@ void main(){
     float scale_factor = 5;
 
     //Field declaration
-    Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.0f/130.0f, 10.0f/150.0f, 7.0f/130.0f);
-
-    std::vector <std::pair<float, float>> box2D_borders = field.get_box2D_borders();
-    std::vector <std::pair<float, float>> main_area = field.get_main_area();
-    
+    Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.f/130.f, 10.f/150.f, 7.f/130.f, 70.f/130.f, 15.f/150.f);
     
     b2Vec2 gravity(0.0f, 0.0f);
     b2World world(gravity);
 
     const int field_points = 16;
-    assert(field_points == box2D_borders.size());
+    assert(field_points == field.box2D_borders.size());
     b2Vec2 vs[field_points];
 
-    for(int i = 0; i < box2D_borders.size(); ++i){
-        vs[i].Set(box2D_borders[i].first, box2D_borders[i].second);
+    for(int i = 0; i < field.box2D_borders.size(); ++i){
+        vs[i].Set(field.box2D_borders[i].first, field.box2D_borders[i].second);
     }
     
     b2ChainShape chain;
@@ -187,14 +183,21 @@ void main(){
                 printf("Bytes sent: %d\n", server.get_send_result());
             } else if(data[0] == 'f'){
                 printf("Sending field coordinates...\n");
-
                 msg[0] = '\0';
-                for(int i = 0; i < box2D_borders.size(); ++i){
-                    sprintf_s(aux,"%4.2f %4.2f ", box2D_borders[i].first, box2D_borders[i].second);
+                for(int i = 0; i < field.box2D_borders.size(); ++i){
+                    sprintf_s(aux,"%4.2f %4.2f ", field.box2D_borders[i].first, field.box2D_borders[i].second);
                     strcat_s(msg, aux);
                 } 
-                for(int i = 0; i < main_area.size(); ++i){
-                    sprintf_s(aux,"%4.2f %4.2f ", main_area[i].first, main_area[i].second);
+                for(int i = 0; i < field.main_area.size(); ++i){
+                    sprintf_s(aux,"%4.2f %4.2f ", field.main_area[i].first, field.main_area[i].second);
+                    strcat_s(msg, aux);
+                } 
+                for(int i = 0; i < field.small_area_left.size(); ++i){
+                    sprintf_s(aux,"%4.2f %4.2f ", field.small_area_left[i].first, field.small_area_left[i].second);
+                    strcat_s(msg, aux);
+                } 
+                for(int i = 0; i < field.small_area_right.size(); ++i){
+                    sprintf_s(aux,"%4.2f %4.2f ", field.small_area_right[i].first, field.small_area_right[i].second);
                     strcat_s(msg, aux);
                 } 
                 strcat_s(msg, "\n");
