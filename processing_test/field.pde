@@ -4,6 +4,8 @@ class Field{
   Point[] small_area_left;
   Point[] small_area_right;
   Point[] mid_line;
+  Point mid_circle_pos;
+  float mid_circle_r;
   Field(float data[], Box2DTransform box2dtransform){
     box2D_borders    = new Point[16];
     main_area        = new Point[4];
@@ -25,6 +27,8 @@ class Field{
     for(int i = 28; i < 30; ++i){
       mid_line[i-28] = box2dtransform.transform_point(new Point(data[i*2], data[i*2+1]));
     }
+    mid_circle_pos = box2dtransform.transform_point(new Point(data[60], data[61]));
+    mid_circle_r   = box2dtransform.transform_scalar(data[62]);
   }
   void draw_shape(Point[] shape){
     beginShape();
@@ -40,5 +44,6 @@ class Field{
     draw_shape(small_area_left);
     draw_shape(small_area_right);
     draw_shape(mid_line);
+    circle(mid_circle_pos.x, mid_circle_pos.y, mid_circle_r);
   }
 };

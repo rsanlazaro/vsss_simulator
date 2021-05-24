@@ -26,11 +26,13 @@ Point center;
 Box2DTransform box2dtransform;
 Field field;
 
+boolean paused = false;
+
 void setup() 
 {
   size(1500, 1000);
-  background(204);
-  stroke(0);
+  background(15);
+  stroke(255);
   frameRate(60); // Slow it down a little
   
   center = new Point(width / 2.0, height / 2.0);
@@ -84,37 +86,43 @@ void setup()
 
 void draw() 
 {
+  if(!paused){
+    background(15);
+    c.write("s\n\0");
+    // Receive data from server
+    if (c.available() > 0) {
+      input = c.readString();
+      input = input.substring(0, input.indexOf("\n"));
+      println(input);
+      data = float(split(input, ' '));
+      println(data);
+      ball_pos = box2dtransform.transform_point(new Point(data[0], data[1]));
+      robot_pos = box2dtransform.transform_point(new Point(data[3], data[4]));
+      robot_pos._print();
+      robot_angle = data[5];
+    }
+    
+    
+    strokeWeight(3);
+    
   
-  background(204);
-  c.write("s\n\0");
-  // Receive data from server
-  if (c.available() > 0) {
-    input = c.readString();
-    input = input.substring(0, input.indexOf("\n"));
-    println(input);
-    data = float(split(input, ' '));
-    println(data);
-    ball_pos = box2dtransform.transform_point(new Point(data[0], data[1]));
-    robot_pos = box2dtransform.transform_point(new Point(data[3], data[4]));
-    robot_pos._print();
-    robot_angle = data[5];
+    field._draw();
+    fill(255,0,255);
+    stroke(255);
+    strokeWeight(1);
+    circle(ball_pos.x, ball_pos.y, ball_radius*2);
+    pushMatrix();
+    translate(robot_pos.x, robot_pos.y);
+    rotate(robot_angle);
+    rect(-hx, -hy, hx*2, hy*2);
+    popMatrix();
   }
   
-  fill(255,0,255);
-  strokeWeight(3);
-  
+}
 
-  field._draw();
-  
-  center._draw();
-  
-  stroke(0);
-  strokeWeight(1);
-  circle(ball_pos.x, ball_pos.y, ball_radius*2);
-  pushMatrix();
-  translate(robot_pos.x, robot_pos.y);
-  rotate(robot_angle);
-  rect(-hx, -hy, hx*2, hy*2);
-  popMatrix();
-  
+void keyPressed(){
+  if(key == 'p'){
+    paused = !paused;
+  }
+
 }

@@ -21,7 +21,7 @@ void main(){
     float scale_factor = 5;
 
     //Field declaration
-    Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.f/130.f, 10.f/150.f, 7.f/130.f, 70.f/130.f, 15.f/150.f);
+    Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.f/130.f, 10.f/150.f, 7.f/130.f, 70.f/130.f, 15.f/150.f, 40.f/130.f);
     
     b2Vec2 gravity(0.0f, 0.0f);
     b2World world(gravity);
@@ -204,6 +204,10 @@ void main(){
                     sprintf_s(aux,"%4.2f %4.2f ", field.mid_line[i].first, field.mid_line[i].second);
                     strcat_s(msg, aux);
                 } 
+                //Mid circle
+                sprintf_s(aux,"%4.2f %4.2f %4.2f ", get<0>(field.mid_circle), get<1>(field.mid_circle), get<2>(field.mid_circle));
+                strcat_s(msg, aux);
+
                 strcat_s(msg, "\n");
                 printf(msg); 
                 server.send_message(msg);
