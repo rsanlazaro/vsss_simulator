@@ -27,6 +27,7 @@ Box2DTransform box2dtransform;
 Field field;
 
 boolean paused = false;
+boolean frame_request = false;
 
 void setup() 
 {
@@ -86,7 +87,7 @@ void setup()
 
 void draw() 
 {
-  if(!paused){
+  if(!paused || frame_request){
     background(15);
     c.write("s\n\0");
     // Receive data from server
@@ -116,7 +117,10 @@ void draw()
     rotate(robot_angle);
     rect(-hx, -hy, hx*2, hy*2);
     popMatrix();
+    
+    frame_request = false;
   }
+  
   
 }
 
@@ -124,5 +128,7 @@ void keyPressed(){
   if(key == 'p'){
     paused = !paused;
   }
-
+  if(key == ' '){
+    frame_request = true;
+  }
 }
