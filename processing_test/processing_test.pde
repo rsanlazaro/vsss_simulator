@@ -26,13 +26,15 @@ Point center;
 Box2DTransform box2dtransform;
 Field field;
 
+int background_color = 15;
+
 boolean paused = false;
 boolean frame_request = false;
 
 void setup() 
 {
   size(1500, 1000);
-  background(15);
+  background(background_color);
   stroke(255);
   frameRate(60); // Slow it down a little
   
@@ -88,7 +90,8 @@ void setup()
 void draw() 
 {
   if(!paused || frame_request){
-    background(15);
+    background(background_color);
+    
     c.write("s\n\0");
     // Receive data from server
     if (c.available() > 0) {
@@ -107,7 +110,7 @@ void draw()
     strokeWeight(3);
     
   
-    field._draw();
+    field._draw(background_color);
     fill(255,0,255);
     stroke(255);
     strokeWeight(1);

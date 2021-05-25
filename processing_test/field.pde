@@ -41,15 +41,17 @@ class Field{
     }
     endShape(CLOSE);
   }
-  void _draw(){
+  void _draw(int background_color){
     noFill();
     draw_shape(box2D_borders);
     draw_shape(main_area);
+    circle(mid_circle_pos.x, mid_circle_pos.y, mid_circle_d);
+    arc(small_circle_l_pos.x, small_circle_l_pos.y, small_circle_l_d, small_circle_l_d, 3.*PI/2., 5.*PI/2.);
+    arc(small_circle_r_pos.x, small_circle_r_pos.y, small_circle_r_d, small_circle_r_d, PI/2., 3.*PI/2.);
+    fill(background_color);
     draw_shape(small_area_left);
     draw_shape(small_area_right);
     draw_shape(mid_line);
-    circle(mid_circle_pos.x, mid_circle_pos.y, mid_circle_d);
-    circle(small_circle_l_pos.x, small_circle_l_pos.y, small_circle_l_d);
-    circle(small_circle_r_pos.x, small_circle_r_pos.y, small_circle_r_d);
+    noFill();
   }
 };

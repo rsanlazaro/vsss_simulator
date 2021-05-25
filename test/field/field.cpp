@@ -27,6 +27,8 @@ void Field::calculate_points(){
     float arc_base   = height * small_circle_height_percentage;
     float arc_height = width * small_circle_width_percentage;
     float diameter   = 2.f * ((4.f*arc_height*arc_height + arc_base*arc_base) / (8.f*arc_height));
+    float h_diff     = std::max(diameter / 2.f - small_area_width_offset / 2.f, 0.f);
+    float x_offset   = std::max(arc_height-h_diff, 0.f);
 
     main_area = std::vector <std::pair<float, float>>(4);
 
@@ -58,7 +60,7 @@ void Field::calculate_points(){
     small_area_right[2] = {mid_width, -small_area_height_offset};
     small_area_right[3] = {mid_width-small_area_width_offset, -small_area_height_offset};
 
-    small_circle_right = std::tuple <float, float, float>(mid_width-small_area_width_offset/2.f, 0.f, diameter);
+    small_circle_right = std::tuple <float, float, float>(mid_width-small_area_width_offset/2.f-x_offset, 0.f, diameter);
 
     box2D_borders = std::vector <std::pair<float, float>>(16);
 
