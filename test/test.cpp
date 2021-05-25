@@ -21,7 +21,8 @@ void main(){
     float scale_factor = 5;
 
     //Field declaration
-    Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.f/130.f, 10.f/150.f, 7.f/130.f, 70.f/130.f, 15.f/150.f, 40.f/130.f);
+    Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.f/130.f, 10.f/150.f, 
+                    7.f/130.f, 70.f/130.f, 15.f/150.f, 40.f/130.f, 20.f/130.f, 5.f/150.f);
     
     b2Vec2 gravity(0.0f, 0.0f);
     b2World world(gravity);
@@ -185,27 +186,33 @@ void main(){
                 printf("Sending field coordinates...\n");
                 msg[0] = '\0';
                 for(int i = 0; i < field.box2D_borders.size(); ++i){
-                    sprintf_s(aux,"%4.2f %4.2f ", field.box2D_borders[i].first, field.box2D_borders[i].second);
+                    sprintf_s(aux,"%.2f %.2f ", field.box2D_borders[i].first, field.box2D_borders[i].second);
                     strcat_s(msg, aux);
                 } 
                 for(int i = 0; i < field.main_area.size(); ++i){
-                    sprintf_s(aux,"%4.2f %4.2f ", field.main_area[i].first, field.main_area[i].second);
+                    sprintf_s(aux,"%.2f %.2f ", field.main_area[i].first, field.main_area[i].second);
                     strcat_s(msg, aux);
                 } 
                 for(int i = 0; i < field.small_area_left.size(); ++i){
-                    sprintf_s(aux,"%4.2f %4.2f ", field.small_area_left[i].first, field.small_area_left[i].second);
+                    sprintf_s(aux,"%.2f %.2f ", field.small_area_left[i].first, field.small_area_left[i].second);
                     strcat_s(msg, aux);
                 } 
                 for(int i = 0; i < field.small_area_right.size(); ++i){
-                    sprintf_s(aux,"%4.2f %4.2f ", field.small_area_right[i].first, field.small_area_right[i].second);
+                    sprintf_s(aux,"%.2f %.2f ", field.small_area_right[i].first, field.small_area_right[i].second);
                     strcat_s(msg, aux);
                 } 
                 for(int i = 0; i < field.mid_line.size(); ++i){
-                    sprintf_s(aux,"%4.2f %4.2f ", field.mid_line[i].first, field.mid_line[i].second);
+                    sprintf_s(aux,"%.2f %.2f ", field.mid_line[i].first, field.mid_line[i].second);
                     strcat_s(msg, aux);
                 } 
                 //Mid circle
-                sprintf_s(aux,"%4.2f %4.2f %4.2f ", get<0>(field.mid_circle), get<1>(field.mid_circle), get<2>(field.mid_circle));
+                sprintf_s(aux,"%.2f %.2f %.2f ", get<0>(field.mid_circle), get<1>(field.mid_circle), get<2>(field.mid_circle));
+                strcat_s(msg, aux);
+                //Small circle left
+                sprintf_s(aux,"%.2f %.2f %.2f ", get<0>(field.small_circle_left), get<1>(field.small_circle_left), get<2>(field.small_circle_left));
+                strcat_s(msg, aux);
+                //Small cirlce right
+                sprintf_s(aux,"%.2f %.2f %.2f ", get<0>(field.small_circle_right), get<1>(field.small_circle_right), get<2>(field.small_circle_right));
                 strcat_s(msg, aux);
 
                 strcat_s(msg, "\n");
