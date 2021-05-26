@@ -18,8 +18,7 @@ float data[];
 float ball_radius;
 Point ball_pos;
 
-Point robot_pos;
-float robot_angle;
+Robot r1, r2;
 float hx, hy;
 
 Point center;
@@ -36,7 +35,7 @@ void setup()
   size(1500, 1000);
   background(background_color);
   stroke(255);
-  frameRate(60); // Slow it down a little
+  frameRate(60);
   
   center = new Point(width / 2.0, height / 2.0);
   box2dtransform = new Box2DTransform(150, center);
@@ -83,7 +82,7 @@ void setup()
     println(data);
     hx = box2dtransform.transform_scalar(data[0]);
     hy = box2dtransform.transform_scalar(data[1]);
-    robot_pos = box2dtransform.transform_point(new Point(data[2], data[3]));
+    //r1.position = box2dtransform.transform_point(new Point(data[2], data[3]));
   }
 }
 
@@ -93,17 +92,20 @@ void draw()
     background(background_color);
     
     c.write("s\n\0");
+    println("Requesting world state...");
+    delay(1);
     // Receive data from server
+    println(c.available());
     if (c.available() > 0) {
+      println("data");
       input = c.readString();
       input = input.substring(0, input.indexOf("\n"));
       println(input);
       data = float(split(input, ' '));
       println(data);
       ball_pos = box2dtransform.transform_point(new Point(data[0], data[1]));
-      robot_pos = box2dtransform.transform_point(new Point(data[3], data[4]));
-      robot_pos._print();
-      robot_angle = data[5];
+      r1 = new Robot(box2dtransform.transform_point(new Point(data[3], data[4])), data[5], hx*2.);
+      r2 = new Robot(box2dtransform.transform_point(new Point(data[6], data[7])), data[8], hx*2.);
     }
     
     
@@ -115,11 +117,8 @@ void draw()
     stroke(255);
     strokeWeight(1);
     circle(ball_pos.x, ball_pos.y, ball_radius*2);
-    pushMatrix();
-    translate(robot_pos.x, robot_pos.y);
-    rotate(robot_angle);
-    rect(-hx, -hy, hx*2, hy*2);
-    popMatrix();
+    r1._draw();
+    r2._draw();
     
     frame_request = false;
   }

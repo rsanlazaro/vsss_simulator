@@ -10,6 +10,7 @@ using namespace std;
 //Auxiliary objects
 #include "field/field.hpp"
 #include "server/server.hpp"
+#include "robot/robot.hpp"
 
 //Box2D
 #include "../box2d/include/box2d/box2d.h"
@@ -17,24 +18,24 @@ using namespace std;
 
 void main(){
 
-    //Scale factors for box2d objects to be between 0.1 and 10 m
+    //Scale factors for box2d objects to fit between 0.1 and 10 m
     float scale_factor = 5;
 
     //Field declaration
     Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.f/130.f, 10.f/150.f, 
                     7.f/130.f, 70.f/130.f, 15.f/150.f, 40.f/130.f, 20.f/130.f, 5.f/150.f);
     
+    //Create world
     b2Vec2 gravity(0.0f, 0.0f);
     b2World world(gravity);
 
+    //Create chain of points that represent the field's borders
     const int field_points = 16;
     assert(field_points == field.box2D_borders.size());
     b2Vec2 vs[field_points];
-
     for(int i = 0; i < field.box2D_borders.size(); ++i){
         vs[i].Set(field.box2D_borders[i].first, field.box2D_borders[i].second);
     }
-    
     b2ChainShape chain;
     chain.CreateLoop(vs, field_points);
 
@@ -78,12 +79,37 @@ void main(){
     b2Vec2 point(0.0f, 0.0f);
     body->ApplyForce(force, point, true);
 
-    //Robot body
+    //Robot bodies
+    float size              = 0.075f * scale_factor;
+    float density           = 5.0f;
+    float friction          = 0.5f;
+    float restitution       = 0.1f;
+    float linearDamping     = 0.1f;
+    float angularDamping    = 0.1f;
+
+    //int numer_of_robots = 6;
+
+    b2Vec2 position;
+    float angle; 
+
+    //Robot 1
+    position.Set(-0.8f, 0.5f);
+    angle = 0.f;
+    Robot r1 = Robot(position, angle, size, density, friction, restitution, linearDamping, angularDamping, &world);
+    
+    //Robot 2
+    position.Set(0.8f, 0.5f);
+    angle = 1.1f;
+    Robot r2 = Robot(position, angle, size, density, friction, restitution, linearDamping, angularDamping, &world);
+
+    /*
     b2BodyDef robotBodyDef;
     robotBodyDef.type = b2_dynamicBody;
-    robotBodyDef.position.Set(-0.8f, 0.5f);
+    robotBodyDef.position.Set(position.first, position.second);
+    robotBodyDef.angle = 0.0f; // the body's angle in radians.
+    robotBodyDef.linearDamping = 0.1f;
+    robotBodyDef.angularDamping = 0.1f;
     b2Body* robotBody = world.CreateBody(&robotBodyDef);
-
 
     b2PolygonShape dynamicBox;
     float hx = 0.0375f * scale_factor;
@@ -94,12 +120,14 @@ void main(){
     robotFixtureDef.shape = &dynamicBox;
     robotFixtureDef.density = 5.0f;
     robotFixtureDef.friction = 0.5f;
+    fixtureDef.restitution = 0.1f;
 
     robotBody->CreateFixture(&robotFixtureDef);
+    */
 
-    b2Vec2 robotForce(30.8f, 35.2f);
-    b2Vec2 robotPoint(-0.75f, 0.5f);
-    robotBody->ApplyForce(robotForce, robotPoint, true);
+    //b2Vec2 robotForce(30.8f, 35.2f);
+    //b2Vec2 robotPoint(-0.75f, 0.5f);
+    //robotBody->ApplyForce(robotForce, robotPoint, true);
 
 
 
@@ -175,9 +203,13 @@ void main(){
                 b2Vec2 position = body->GetPosition();
                 float angle = body->GetAngle();
 
-                b2Vec2 robotPosition = robotBody->GetPosition();
-                float robotAngle = robotBody->GetAngle();
-                sprintf_s(msg,"%4.2f %4.2f %4.2f %4.2f %4.2f %4.2f\n", position.x, position.y, angle, robotPosition.x, robotPosition.y, robotAngle);
+                b2Vec2 pos_1 = r1.get_position();
+                float ang_1  = r1.get_angle();
+
+                b2Vec2 pos_2 = r2.get_position();
+                float ang_2  = r2.get_angle();
+                
+                sprintf_s(msg,"%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n", position.x, position.y, angle, pos_1.x, pos_1.y, ang_1, pos_2.x, pos_2.y, ang_2);
                 printf(msg);
 
                 server.send_message(msg);
@@ -230,13 +262,13 @@ void main(){
                 printf("Bytes sent: %d\n", server.get_send_result());
             } else if(data[0] == 'r'){
                 printf("Sending robot definition...\n");
-
-                for(int i = 0; i < dynamicBox.m_count; ++i){
-                    printf("%4.2f %4.2f\n", dynamicBox.m_vertices[i].x, dynamicBox.m_vertices[i].y);
+                b2PolygonShape shape = r1.get_shape();
+                for(int i = 0; i < shape.m_count; ++i){
+                    printf("%4.2f %4.2f\n", shape.m_vertices[i].x, shape.m_vertices[i].y);
                 }
 
-                b2Vec2 position = robotBody->GetPosition();
-                sprintf_s(msg,"%4.2f %4.2f %4.2f %4.2f\n", hx, hy, position.x, position.y);
+                b2Vec2 position = r1.get_position();
+                sprintf_s(msg,"%4.2f %4.2f %4.2f %4.2f\n", size/2.f, size/2.f, position.x, position.y);
                 printf(msg);
 
                 server.send_message(msg);
