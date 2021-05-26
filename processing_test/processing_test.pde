@@ -18,7 +18,7 @@ float data[];
 float ball_radius;
 Point ball_pos;
 
-Robot r1, r2;
+Robot[] robots;
 float hx, hy;
 
 Point center;
@@ -93,7 +93,7 @@ void draw()
     
     c.write("s\n\0");
     println("Requesting world state...");
-    delay(1);
+    delay(5);
     // Receive data from server
     println(c.available());
     if (c.available() > 0) {
@@ -104,8 +104,12 @@ void draw()
       data = float(split(input, ' '));
       println(data);
       ball_pos = box2dtransform.transform_point(new Point(data[0], data[1]));
-      r1 = new Robot(box2dtransform.transform_point(new Point(data[3], data[4])), data[5], hx*2.);
-      r2 = new Robot(box2dtransform.transform_point(new Point(data[6], data[7])), data[8], hx*2.);
+      int number_of_robots = (int)data[2];
+      robots = new Robot[number_of_robots];
+      for(int i = 0; i < robots.length; ++i){
+        robots[i] = new Robot(box2dtransform.transform_point(new Point(data[(i+1)*3], data[(i+1)*3+1])), -data[(i+1)*3+2], hx*2.);
+        robots[i]._print();
+      }
     }
     
     
@@ -117,8 +121,9 @@ void draw()
     stroke(255);
     strokeWeight(1);
     circle(ball_pos.x, ball_pos.y, ball_radius*2);
-    r1._draw();
-    r2._draw();
+    for(int i = 0; i < robots.length; ++i){
+      robots[i]._draw();
+    }
     
     frame_request = false;
   }

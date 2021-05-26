@@ -1,5 +1,6 @@
 #include "robot.hpp"
 
+Robot::Robot(){}
 Robot::Robot(const b2Vec2 &position, const float &angle, const float &size, const float &density, const float &friction,
 const float &restitution, const float &linearDamping, const float &angularDamping, b2World* world){
 

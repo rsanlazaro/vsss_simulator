@@ -11,7 +11,8 @@ class Robot{
         b2PolygonShape dynamicBox;
         b2FixtureDef   fixtureDef;
     public:
-        Robot(const b2Vec2 &positionn, const float &angle, const float &size, const float &density, const float &friction,
+        Robot();
+        Robot(const b2Vec2 &position, const float &angle, const float &size, const float &density, const float &friction,
         const float &restitution, const float &linearDamping, const float &angularDamping, b2World* world);
         b2Vec2 get_position();
         float  get_angle();
