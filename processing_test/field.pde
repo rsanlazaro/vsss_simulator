@@ -42,6 +42,8 @@ class Field{
     endShape(CLOSE);
   }
   void _draw(int background_color){
+    stroke(255);
+    strokeWeight(3);
     noFill();
     draw_shape(box2D_borders);
     draw_shape(main_area);

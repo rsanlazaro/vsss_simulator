@@ -11,23 +11,23 @@
 
 import processing.net.*;
 
-Client c;
-String input;
-float data[];
+Box2DTCPHandler handler;
 
-float ball_radius;
-Point ball_pos;
+//1 meter is equivalent to "meterToPixel" pixels
+float meterToPixel = 150.;
+
+Field field;
+
+Ball ball;
 
 Robot[] robots;
 float hx, hy;
 
-Point center;
-Box2DTransform box2dtransform;
-Field field;
-
 int background_color = 15;
+color ball_color = color(255, 128, 0);
+//color team_1     = color();
 
-boolean paused = false;
+boolean paused = true;
 boolean frame_request = false;
 
 void setup() 
@@ -37,98 +37,34 @@ void setup()
   stroke(255);
   frameRate(60);
   
-  center = new Point(width / 2.0, height / 2.0);
-  box2dtransform = new Box2DTransform(150, center);
+  //TCP Handler for Box2D Server
+  handler = new Box2DTCPHandler(this, "127.0.0.1", 27015, meterToPixel);
+  //Field description
+  handler.request_field_description(paused);
+  //Ball description
+  handler.request_ball_description(paused);
+  //Robot description
+  handler.request_robot_description(paused);
   
-  // Connect to the server's IP address and port
-  c = new Client(this, "127.0.0.1", 27015); // Replace with your server's IP and port
-  
-  //Get simulator field coordinates
-  println("Requesting field coordinates...");
-  c.write("f\n\0");
-  // Receive data from server
-  delay(100);
-  if (c.available() > 0) {
-    input = c.readString();
-    input = input.substring(0, input.indexOf("\n"));
-    data = float(split(input, ' '));
-    println(data);
-    field = new Field(data, box2dtransform);
-  }
-  
-  //Get ball definition
-  println("Requesting ball definition...");
-  c.write("b\n\0");
-  // Receive data from server
-  delay(100);
-  if (c.available() > 0) {
-    input = c.readString();
-    input = input.substring(0, input.indexOf("\n"));
-    data = float(split(input, ' '));
-    println(data);
-    ball_radius = box2dtransform.transform_scalar(data[0]);
-    ball_pos = box2dtransform.transform_point(new Point(data[1], data[2]));
-  }
-  
-  //Get robot definition
-  println("Requesting robot definition...");
-  c.write("r\n\0");
-  // Receive data from server
-  delay(1000);
-  if (c.available() > 0) {
-    input = c.readString();
-    input = input.substring(0, input.indexOf("\n"));
-    data = float(split(input, ' '));
-    println(data);
-    hx = box2dtransform.transform_scalar(data[0]);
-    hy = box2dtransform.transform_scalar(data[1]);
-    //r1.position = box2dtransform.transform_point(new Point(data[2], data[3]));
-  }
+  //Set ball color
+  ball.set_color(ball_color);
 }
 
 void draw() 
 {
   if(!paused || frame_request){
+    handler.request_world_state(paused);
+    
+    //Draw state
     background(background_color);
-    
-    c.write("s\n\0");
-    println("Requesting world state...");
-    delay(5);
-    // Receive data from server
-    println(c.available());
-    if (c.available() > 0) {
-      println("data");
-      input = c.readString();
-      input = input.substring(0, input.indexOf("\n"));
-      println(input);
-      data = float(split(input, ' '));
-      println(data);
-      ball_pos = box2dtransform.transform_point(new Point(data[0], data[1]));
-      int number_of_robots = (int)data[2];
-      robots = new Robot[number_of_robots];
-      for(int i = 0; i < robots.length; ++i){
-        robots[i] = new Robot(box2dtransform.transform_point(new Point(data[(i+1)*3], data[(i+1)*3+1])), -data[(i+1)*3+2], hx*2.);
-        robots[i]._print();
-      }
-    }
-    
-    
-    strokeWeight(3);
-    
-  
     field._draw(background_color);
-    fill(255,0,255);
-    stroke(255);
-    strokeWeight(1);
-    circle(ball_pos.x, ball_pos.y, ball_radius*2);
+    ball._draw();
     for(int i = 0; i < robots.length; ++i){
       robots[i]._draw();
     }
     
     frame_request = false;
   }
-  
-  
 }
 
 void keyPressed(){

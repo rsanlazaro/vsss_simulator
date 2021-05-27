@@ -9,10 +9,11 @@ class Robot{
     this.size     = size;
   }
   void _draw(){
+    rectMode(CENTER);
     pushMatrix();
     translate(position.x, position.y);
     rotate(-angle);
-    rect(-size/2., -size/2., size, size);
+    rect(0, 0, size, size);
     popMatrix();
   }
   void _print(){

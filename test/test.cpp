@@ -203,17 +203,22 @@ void main(){
                     strcat_s(msg, aux);
                 }
                 strcat_s(msg, "\n");
-                /*
-                b2PolygonShape shape = r2.get_shape();
-                for(int i = 0; i < shape.m_count; ++i){
-                    printf("%4.2f %4.2f\n", shape.m_vertices[i].x, shape.m_vertices[i].y);
-                }
-                */
-                
-                //sprintf_s(msg,"%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n", position.x, position.y, angle, pos_1.x, pos_1.y, ang_1, pos_2.x, pos_2.y, ang_2);
                 printf(msg);
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
+
+                //Debug
+                /*
+                for(int i = 0; i < robots.size(); ++i){
+                    b2Vec2 position = robots[i].get_position();
+                    float angle     = robots[i].get_angle();
+                    printf("\trobot %d:\n", i);
+                    printf("\t\tposition: %.4f %.4f\n", position.x, position.y);
+                    printf("\t\tangle: %.4f\n", angle);
+                }
+                */
+
+
             } else if(data[0] == 'f'){
                 printf("Sending field coordinates...\n");
                 msg[0] = '\0';
@@ -255,7 +260,7 @@ void main(){
                 printf("Sending ball definition...\n");
 
                 b2Vec2 position = body->GetPosition();
-                sprintf_s(msg,"%4.2f %4.2f %4.2f\n", circle.m_radius, position.x, position.y);
+                sprintf_s(msg,"%.4f %.2f %.2f\n", circle.m_radius, position.x, position.y);
                 printf(msg);
 
                 server.send_message(msg);
