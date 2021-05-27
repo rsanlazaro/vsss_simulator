@@ -73,6 +73,7 @@ void main(){
     fixtureDef.density = 0.25f;
     fixtureDef.friction = 0.0f;
     fixtureDef.restitution = 1.0f;
+    fixtureDef.restitutionThreshold = 0.5f;  // Fixes magnetic behavior with slow velocity collisions
     body->CreateFixture(&fixtureDef);
 
     b2Vec2 force(5.8f, 5.2f);
