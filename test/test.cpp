@@ -21,14 +21,14 @@ void main(){
     //Scale factors for box2d objects to fit between 0.1 and 10 m
     float scale_factor = 5;
 
+    //Create box2d world
+    b2Vec2 gravity(0.0f, 0.0f);
+    b2World world(gravity);
+
     //Field declaration
     Field field = Field(1.5f * scale_factor, 1.3f * scale_factor, 40.f/130.f, 10.f/150.f, 
                     7.f/130.f, 70.f/130.f, 15.f/150.f, 40.f/130.f, 20.f/130.f, 5.f/150.f);
     
-    //Create world
-    b2Vec2 gravity(0.0f, 0.0f);
-    b2World world(gravity);
-
     //Create chain of points that represent the field's borders
     const int field_points = 16;
     assert(field_points == field.box2D_borders.size());
@@ -81,7 +81,7 @@ void main(){
     body->ApplyForce(force, point, true);
 
     //Robot bodies
-    float size              = 0.075f * scale_factor;
+    float side_length       = 0.075f * scale_factor;
     float density           = 5.0f;
     float friction          = 0.5f;
     float restitution       = 0.1f;
@@ -108,7 +108,7 @@ void main(){
     angle[5] = 0.f;
 
     for(int i = 0; i < robots.size(); ++i){
-        robots[i] = Robot(position[i], angle[i], size, density, friction, restitution, linearDamping, angularDamping, &world);
+        robots[i] = Robot(position[i], angle[i], side_length, density, friction, restitution, linearDamping, angularDamping, &world);
     }
 
     //b2Vec2 robotForce(30.8f, 35.2f);
@@ -149,22 +149,8 @@ void main(){
     int32 velocityIterations = 6;
     int32 positionIterations = 2;
     */
-
     int32 velocityIterations = 10;
     int32 positionIterations = 8;
-
-
-
-
-    /*
-    for (int32 i = 0; i < 60; ++i)
-    {
-        world.Step(timeStep, velocityIterations, positionIterations);
-        b2Vec2 position = body->GetPosition();
-        float angle = body->GetAngle();
-        printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
-    }
-    */
 
     char msg[DEFAULT_BUFLEN];
     char aux[DEFAULT_BUFLEN];
@@ -185,7 +171,6 @@ void main(){
             if(data[0] == 's'){
                 printf("Sending world state...\n");
 
-                world.Step(timeStep, velocityIterations, positionIterations);
                 b2Vec2 position = body->GetPosition();
                 float angle = body->GetAngle();
 
@@ -194,8 +179,8 @@ void main(){
                 sprintf_s(aux,"%.2f %.2f ", position.x, position.y);
                 strcat_s(msg, aux);
                 //Number of robots
-                sprintf_s(aux,"%zd ", robots.size());
-                strcat_s(msg, aux);
+                //sprintf_s(aux,"%zd ", robots.size());
+                //strcat_s(msg, aux);
                 //Robots positions and angles
                 for(int i = 0; i < robots.size(); ++i){
                     b2Vec2 position = robots[i].get_position();
@@ -207,6 +192,8 @@ void main(){
                 printf(msg);
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
+
+                world.Step(timeStep, velocityIterations, positionIterations);
 
                 //Debug
                 /*
@@ -221,7 +208,7 @@ void main(){
 
 
             } else if(data[0] == 'f'){
-                printf("Sending field coordinates...\n");
+                printf("Sending field description...\n");
                 msg[0] = '\0';
                 for(int i = 0; i < field.box2D_borders.size(); ++i){
                     sprintf_s(aux,"%.2f %.2f ", field.box2D_borders[i].first, field.box2D_borders[i].second);
@@ -258,25 +245,15 @@ void main(){
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
             } else if(data[0] == 'b'){
-                printf("Sending ball definition...\n");
-
-                b2Vec2 position = body->GetPosition();
-                sprintf_s(msg,"%.4f %.2f %.2f\n", circle.m_radius, position.x, position.y);
+                printf("Sending ball description...\n");
+                sprintf_s(msg,"%.4f\n", circle.m_radius);
                 printf(msg);
-
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
             } else if(data[0] == 'r'){
                 printf("Sending robot definition...\n");
-                b2PolygonShape shape = robots[0].get_shape();
-                for(int i = 0; i < shape.m_count; ++i){
-                    printf("%4.2f %4.2f\n", shape.m_vertices[i].x, shape.m_vertices[i].y);
-                }
-
-                b2Vec2 position = robots[0].get_position();
-                sprintf_s(msg,"%4.2f %4.2f %4.2f %4.2f\n", size/2.f, size/2.f, position.x, position.y);
+                sprintf_s(msg,"%.4f %zd\n", side_length, robots.size());
                 printf(msg);
-
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
             }

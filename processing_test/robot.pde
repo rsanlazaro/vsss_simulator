@@ -1,19 +1,30 @@
 class Robot{
   Point position;
   float angle;
-  float size;
+  float side_length;
+  int team;
+  color team_clr;
   Robot(){}
-  Robot(Point position, float angle, float size){
+  Robot(float side_length){
+    this.side_length = side_length;
+  }
+  void set_position(Point position){
     this.position = position;
-    this.angle    = angle;
-    this.size     = size;
+  }
+  void set_angle(float angle){
+    this.angle = angle;
+  }
+  void set_team(int team, color team_clr){
+    this.team = team;
+    this.team_clr = team_clr;
   }
   void _draw(){
     rectMode(CENTER);
     pushMatrix();
     translate(position.x, position.y);
     rotate(-angle);
-    rect(0, 0, size, size);
+    //fill(team_clr);
+    rect(0, 0, side_length, side_length);
     popMatrix();
   }
   void _print(){

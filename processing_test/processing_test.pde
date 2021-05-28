@@ -17,18 +17,16 @@ Box2DTCPHandler handler;
 float meterToPixel = 150.;
 
 Field field;
-
 Ball ball;
-
 Robot[] robots;
-float hx, hy;
 
 int background_color = 15;
 color ball_color = color(255, 128, 0);
-//color team_1     = color();
+color team_1_color = color(89, 0, 255);
+color team_2_color = color(216, 255, 0);
 
 boolean paused = true;
-boolean frame_request = false;
+boolean frame_request = true;
 
 void setup() 
 {
@@ -38,22 +36,30 @@ void setup()
   frameRate(60);
   
   //TCP Handler for Box2D Server
-  handler = new Box2DTCPHandler(this, "127.0.0.1", 27015, meterToPixel);
+  handler = new Box2DTCPHandler(this, "127.0.0.1", 27015);
   //Field description
-  handler.request_field_description(paused);
+  handler.request_field_description();
   //Ball description
-  handler.request_ball_description(paused);
+  handler.request_ball_description();
   //Robot description
-  handler.request_robot_description(paused);
+  handler.request_robot_description();
   
-  //Set ball color
-  ball.set_color(ball_color);
+  
+  /*
+  //Set robots colors
+  for(int i = 0; i < robots.length; ++i){
+    if(i < 3){
+      robots[i].set_team(1, team_1_color);
+    } else{
+      robots[i].set_team(2, team_2_color);
+    }
+  }*/
 }
 
 void draw() 
 {
   if(!paused || frame_request){
-    handler.request_world_state(paused);
+    handler.request_world_state();
     
     //Draw state
     background(background_color);

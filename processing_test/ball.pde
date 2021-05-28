@@ -3,15 +3,12 @@ class Ball{
   float radius;
   color clr;
   Ball(){}
-  Ball(Point position, float radius){
-    this.position = position;
+  Ball(float radius, color clr){
     this.radius   = radius;
+    this.clr      = clr;
   }
   void set_position(Point position){
     this.position = position;
-  }
-  void set_color(color clr){
-    this.clr = clr;
   }
   void _print(){
     print("position: ");
