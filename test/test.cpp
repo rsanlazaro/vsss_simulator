@@ -99,13 +99,13 @@ void main(){
     position[1].Set(0.8f, 0.5f);
     angle[1] = 1.1f;
     position[2].Set(-0.8f, -0.5f);
-    angle[2] = 0.f;
+    angle[2] = 1.2f;
     position[3].Set(0.8f, -0.5f);
-    angle[3] = 0.f;
+    angle[3] = 1.3f;
     position[4].Set(1.5f, 0.5f);
-    angle[4] = 0.f;
+    angle[4] = 1.4f;
     position[5].Set(-1.5f, 0.5f);
-    angle[5] = 0.f;
+    angle[5] = 1.f;
 
     for(int i = 0; i < robots.size(); ++i){
         robots[i] = Robot(position[i], angle[i], side_length, density, friction, restitution, linearDamping, angularDamping, &world);
@@ -149,8 +149,8 @@ void main(){
     int32 velocityIterations = 6;
     int32 positionIterations = 2;
     */
-    int32 velocityIterations = 10;
-    int32 positionIterations = 8;
+    int32 velocityIterations = 12;
+    int32 positionIterations = 10;
 
     char msg[DEFAULT_BUFLEN];
     char aux[DEFAULT_BUFLEN];

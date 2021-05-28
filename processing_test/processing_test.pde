@@ -20,6 +20,9 @@ Field field;
 Ball ball;
 Robot[] robots;
 
+//robot teams (1 for team 1 and 2 for team 2)
+int[] robot_teams = {1,1,1,2,2,2};
+
 int background_color = 15;
 color ball_color = color(255, 128, 0);
 color team_1_color = color(89, 0, 255);

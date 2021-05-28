@@ -52,7 +52,7 @@ class Box2DTCPHandler{
     int number_of_robots = (int)data[1];
     robots = new Robot[number_of_robots];
     for(int i = 0; i < robots.length; ++i){
-      robots[i] = new Robot(side_length);
+      robots[i] = new Robot(side_length, robot_teams[i]);
     }
     if(paused){
       println("Requesting robot description...");
