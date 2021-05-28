@@ -14,8 +14,7 @@ class Robot{
         Robot();
         Robot(const b2Vec2 &position, const float &angle, const float &size, const float &density, const float &friction,
         const float &restitution, const float &linearDamping, const float &angularDamping, b2World* world);
-        b2Vec2 get_position();
-        float  get_angle();
+        b2Body* get_body_ptr();
         b2PolygonShape get_shape();
 };
 

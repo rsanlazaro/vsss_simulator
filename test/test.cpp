@@ -183,8 +183,9 @@ void main(){
                 //strcat_s(msg, aux);
                 //Robots positions and angles
                 for(int i = 0; i < robots.size(); ++i){
-                    b2Vec2 position = robots[i].get_position();
-                    float angle     = robots[i].get_angle();
+                    b2Body* robotBody = robots[i].get_body_ptr();
+                    b2Vec2 position = robotBody->GetPosition();
+                    float angle     = robotBody->GetAngle();
                     sprintf_s(aux,"%.2f %.2f %.2f ", position.x, position.y, angle);
                     strcat_s(msg, aux);
                 }
@@ -256,6 +257,36 @@ void main(){
                 printf(msg);
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
+            } else if (data[0] == 'a') {
+                printf("Recieving forces definition...\n");
+                b2Body* robotBody    = robots[0].get_body_ptr();
+                b2Vec2 robotPosition = robotBody->GetPosition();
+                float robotAngle     = robotBody->GetAngle();
+
+                memcpy(aux, &data[2], sizeof(data));
+                float force_m1;
+                float force_m2;
+                sscanf_s(aux, "%f %f", &force_m1, &force_m2);
+
+                cout <<"\n"<<"Force m1 .. " << force_m1<<"\n";
+                cout <<"\n" << "Force m2 .. " << force_m2 << "\n\n";
+
+                float p1_x = 0.0f;
+                float p1_y = 0.2f;
+                float p2_x = 0.0f;
+                float p2_y = -0.2f;
+
+                b2Vec2 robotPointMotor1(p1_x, p1_y);
+                b2Vec2 robotPointMotor2(p2_x, p2_y);
+
+                b2Vec2 motor1 = robotBody->GetWorldPoint(robotPointMotor1); //Get position of motor 1 in world coord..
+                b2Vec2 motor2 = robotBody->GetWorldPoint(robotPointMotor2); //Get position of motor 2 in world coord..
+                
+                b2Vec2 robotForceMotor1(force_m1* cos(robotAngle), force_m1* sin(robotAngle));
+                b2Vec2 robotForceMotor2(force_m2* cos(robotAngle), force_m2* sin(robotAngle));
+
+                robotBody->ApplyForce(robotForceMotor1, motor1, true);
+                robotBody->ApplyForce(robotForceMotor2, motor2, true);
             }
         }
         else if (server.get_send_result() == 0)

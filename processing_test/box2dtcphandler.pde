@@ -82,5 +82,10 @@ class Box2DTCPHandler{
       }
     }
   }
+  
+  void send_velocities(float vl, float vr){
+    println("String values.. " + nf(vl,0,3) + " " + nf(vr,0,3));
+    c.write("a " + vl + " " + vr + "\n\0");
+  }
 
 };

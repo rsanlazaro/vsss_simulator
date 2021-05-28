@@ -29,11 +29,8 @@ const float &restitution, const float &linearDamping, const float &angularDampin
     //Add fixture to body
     body->CreateFixture(&fixtureDef);
 }
-b2Vec2 Robot::get_position(){
-    return body->GetPosition();
-}
-float Robot::get_angle(){
-    return body->GetAngle();
+b2Body* Robot::get_body_ptr(){
+    return body;
 }
 b2PolygonShape Robot::get_shape(){
     return dynamicBox;

@@ -20,8 +20,12 @@ Field field;
 Ball ball;
 Robot[] robots;
 
+Robot_kine robot_kine = new Robot_kine(0.1, 0.4);
+
 //robot teams (1 for team 1 and 2 for team 2)
 int[] robot_teams = {1,1,1,2,2,2};
+//robot roles (1 for goalkeeper, 2 for midfield and 3 for forward)
+int[] robot_roles = {1,2,3,1,2,3};
 
 int background_color = 15;
 color ball_color = color(255, 128, 0);
@@ -46,17 +50,6 @@ void setup()
   handler.request_ball_description();
   //Robot description
   handler.request_robot_description();
-  
-  
-  /*
-  //Set robots colors
-  for(int i = 0; i < robots.length; ++i){
-    if(i < 3){
-      robots[i].set_team(1, team_1_color);
-    } else{
-      robots[i].set_team(2, team_2_color);
-    }
-  }*/
 }
 
 void draw() 
@@ -73,6 +66,9 @@ void draw()
     }
     
     frame_request = false;
+    
+    robot_kine.setSpeed(0., 1.);
+    handler.send_velocities(robot_kine.VL, robot_kine.VR);
   }
 }
 
