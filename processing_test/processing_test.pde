@@ -50,6 +50,20 @@ void setup()
   handler.request_ball_description();
   //Robot description
   handler.request_robot_description();
+  
+  
+  robot_kine.setSpeed(1.0, 0.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 0);
+  robot_kine.setSpeed(0.0, 1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 1);
+  robot_kine.setSpeed(0.0, -1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 2);
+  robot_kine.setSpeed(1.0, 1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 3);
+  robot_kine.setSpeed(1.0, 2.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 4);
+  robot_kine.setSpeed(2.0, 1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 5);
 }
 
 void draw() 
@@ -66,9 +80,6 @@ void draw()
     }
     
     frame_request = false;
-    
-    robot_kine.setSpeed(5.0, -4.0);
-    handler.send_velocities(robot_kine.VL, robot_kine.VR);
   }
 }
 
