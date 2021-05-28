@@ -10,17 +10,21 @@
 
 
 import processing.net.*;
-
+Robot_kine robot_kine;
 Box2DTCPHandler handler;
 
 //1 meter is equivalent to "meterToPixel" pixels
-float meterToPixel = 100.;
+float meterToPixel = 70.;
+String input;
+float data[];
 
 Field field;
 Ball ball;
 Robot[] robots;
+Server s;
+Client c1;
+Client c2;
 
-Robot_kine robot_kine = new Robot_kine(0.1, 0.4);
 
 //robot teams (1 for team 1 and 2 for team 2)
 int[] robot_teams = {1,1,1,2,2,2};
@@ -37,11 +41,13 @@ boolean frame_request = true;
 
 void setup() 
 {
-  size(1200, 700);
+  size(600, 500);
   background(background_color);
   stroke(255);
   frameRate(60);
   
+  s = new Server(this, 12345); // Start a simple server on a port
+  robot_kine=new Robot_kine(0.1, 0.4);
   //TCP Handler for Box2D Server
   handler = new Box2DTCPHandler(this, "127.0.0.2", 27015);
   //Field description
@@ -52,18 +58,9 @@ void setup()
   handler.request_robot_description();
   
   
-  robot_kine.setSpeed(1.0, 0.0);
-  handler.send_velocities(robot_kine.VL, robot_kine.VR, 0);
-  robot_kine.setSpeed(0.0, 1.0);
-  handler.send_velocities(robot_kine.VL, robot_kine.VR, 1);
-  robot_kine.setSpeed(0.0, -1.0);
-  handler.send_velocities(robot_kine.VL, robot_kine.VR, 2);
-  robot_kine.setSpeed(1.0, 1.0);
-  handler.send_velocities(robot_kine.VL, robot_kine.VR, 3);
-  robot_kine.setSpeed(1.0, 2.0);
-  handler.send_velocities(robot_kine.VL, robot_kine.VR, 4);
-  robot_kine.setSpeed(2.0, 1.0);
-  handler.send_velocities(robot_kine.VL, robot_kine.VR, 5);
+  // Receive data from client
+
+  
 }
 
 void draw() 
@@ -80,6 +77,30 @@ void draw()
     }
     
     frame_request = false;
+    
+
+  c1 = s.available();
+  if (c1 != null) {
+    println("recieving data from client");
+    input = c1.readString();
+
+    input = input.substring(0, input.indexOf("\n")); // Only up to the newline
+    data = float(split(input, ' ')); // Split values into an array
+    robot_kine.setSpeed(data[1], data[2]);
+    int id = int(data[0]);
+    handler.send_velocities(robot_kine.VL, robot_kine.VR, id);
+  }
+/*  c2 = s.available();
+  if (c2 != null) {
+    println("recieving data from client");
+    input = c1.readString();
+
+    input = input.substring(0, input.indexOf("\n")); // Only up to the newline
+    data = float(split(input, ' ')); // Split values into an array
+    robot_kine.setSpeed(data[1], data[2]);
+    int id = int(data[0]);
+    handler.send_velocities(robot_kine.VL, robot_kine.VR, id);
+  }*/
   }
 }
 

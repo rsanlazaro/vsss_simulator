@@ -282,6 +282,7 @@ void main(){
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
             } else if (data[0] == 'a') {
+
                 printf("Recieving forces definition...\n");
                 memcpy(aux, &data[2], strlen(data)-2);
                 float force_m1;
@@ -297,6 +298,8 @@ void main(){
                 printf(msg);
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
+               
+                
             }
         }
         else if (server.get_send_result() == 0)
