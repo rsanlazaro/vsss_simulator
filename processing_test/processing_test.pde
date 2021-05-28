@@ -14,7 +14,7 @@ import processing.net.*;
 Box2DTCPHandler handler;
 
 //1 meter is equivalent to "meterToPixel" pixels
-float meterToPixel = 150.;
+float meterToPixel = 100.;
 
 Field field;
 Ball ball;
@@ -37,19 +37,33 @@ boolean frame_request = true;
 
 void setup() 
 {
-  size(1500, 1000);
+  size(1200, 700);
   background(background_color);
   stroke(255);
   frameRate(60);
   
   //TCP Handler for Box2D Server
-  handler = new Box2DTCPHandler(this, "127.0.0.1", 27015);
+  handler = new Box2DTCPHandler(this, "127.0.0.2", 27015);
   //Field description
   handler.request_field_description();
   //Ball description
   handler.request_ball_description();
   //Robot description
   handler.request_robot_description();
+  
+  
+  robot_kine.setSpeed(1.0, 0.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 0);
+  robot_kine.setSpeed(0.0, 1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 1);
+  robot_kine.setSpeed(0.0, -1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 2);
+  robot_kine.setSpeed(1.0, 1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 3);
+  robot_kine.setSpeed(1.0, 2.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 4);
+  robot_kine.setSpeed(2.0, 1.0);
+  handler.send_velocities(robot_kine.VL, robot_kine.VR, 5);
 }
 
 void draw() 
@@ -66,9 +80,6 @@ void draw()
     }
     
     frame_request = false;
-    
-    robot_kine.setSpeed(0., 1.);
-    handler.send_velocities(robot_kine.VL, robot_kine.VR);
   }
 }
 

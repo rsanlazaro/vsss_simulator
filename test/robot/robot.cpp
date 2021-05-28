@@ -25,6 +25,7 @@ const float &restitution, const float &linearDamping, const float &angularDampin
     fixtureDef.density     = density;
     fixtureDef.friction    = friction;
     fixtureDef.restitution = restitution;
+    fixtureDef.restitutionThreshold = 0.1f;
 
     //Add fixture to body
     body->CreateFixture(&fixtureDef);
