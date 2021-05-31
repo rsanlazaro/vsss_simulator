@@ -14,7 +14,7 @@ import processing.net.*;
 Box2DTCPHandler handler;
 
 //1 meter is equivalent to "meterToPixel" pixels
-float meterToPixel = 100.;
+float meterToPixel = 150.;
 
 Field field;
 Ball ball;
@@ -37,7 +37,7 @@ boolean frame_request = true;
 
 void setup() 
 {
-  size(1200, 700);
+  size(1500, 1000);
   background(background_color);
   stroke(255);
   frameRate(60);
