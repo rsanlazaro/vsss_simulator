@@ -1,6 +1,10 @@
+**/build/**
+**/.vscode/**
+box2d/imgui.ini
+box2d/settings.ini
+box2d/CMakeSettings.json
+box2d/out/
+box2d/.vs/
 
-test/build/
 
-.vscode/
 
-box2d/
