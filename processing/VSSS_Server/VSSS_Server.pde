@@ -28,6 +28,7 @@ int[] robot_roles = {1,2,3,1,2,3};
 
 int background_color = 15;
 color ball_color       = color(255, 128, 0);   //Orange-ish
+color robots_color     = color(163, 156, 11);  //Yellow-ish
 color team_1_color     = color(121, 100, 151); //Purple-ish
 color team_2_color     = color(163, 156, 11);  //Yellow-ish
 color goalkeeper_color = color(255, 0, 0);     //Red-ish

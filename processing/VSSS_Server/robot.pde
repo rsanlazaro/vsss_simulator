@@ -20,12 +20,17 @@ class Robot{
     pushMatrix();
     translate(position.x, position.y);
     rotate(-angle);
+    
+    fill(robots_color);
+    rect(0, 0, side_length, side_length);
     if(team == 1){
       fill(team_1_color);
     } else{
       fill(team_2_color);
     }
-    rect(0, 0, side_length, side_length);
+    
+    
+    
     if(role == 1){
       fill(goalkeeper_color);
     } else if(role == 2){
