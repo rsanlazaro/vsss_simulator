@@ -55,9 +55,6 @@ void setup()
   stroke(255);
   frameRate(60);
   
-  s = new Server(this, 12345); // Start a simple server on a port
-  
-  
   //TCP Handler for Box2D Server
   handler = new Box2DTCPHandler(this, "127.0.0.2", 27015);
   //Field description
@@ -66,11 +63,8 @@ void setup()
   handler.request_ball_description();
   //Robot description
   handler.request_robot_description();
-  
-  
-  // Receive data from client
-
-  
+  //Thread that handles the communication with clients
+  thread("ClientsTCP");
 }
 
 void draw() 
@@ -87,8 +81,23 @@ void draw()
     }
     
     frame_request = false;
-    
-    //Recieve data from clients
+  }
+}
+
+void keyPressed(){
+  if(key == 'p'){
+    paused = !paused;
+  }
+  if(key == ' '){
+    frame_request = true;
+  }
+}
+
+void ClientsTCP(){
+  s = new Server(this, 12345); // Start a simple server on a port
+  
+  //Recieve data from clients
+  while(true){
     c1 = s.available();
     if (c1 != null) {
       println("Recieving data from client");
@@ -110,15 +119,6 @@ void draw()
         println("Right velocity: " + model.right_velocity);
       }
     }
-    
-  }
-}
-
-void keyPressed(){
-  if(key == 'p'){
-    paused = !paused;
-  }
-  if(key == ' '){
-    frame_request = true;
+    delay(5);
   }
 }
