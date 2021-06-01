@@ -1,13 +1,3 @@
-/**
- * Shared Drawing Canvas (Client) 
- * by Alexander R. Galloway. 
- * 
- * The Processing Client class is instantiated by specifying a remote 
- * address and port number to which the socket connection should be made. 
- * Once the connection is made, the client may read (or write) data to the server.
- * Before running this program, start the Shared Drawing Canvas (Server) program.
- */
-
 
 import processing.net.*;
 
@@ -71,7 +61,6 @@ void draw()
 {
   if(!paused || frame_request){
     handler.request_world_state();
-    
     //Draw state
     background(background_color);
     field._draw(background_color);
@@ -79,7 +68,6 @@ void draw()
     for(int i = 0; i < robots.length; ++i){
       robots[i]._draw();
     }
-    
     frame_request = false;
   }
 }
