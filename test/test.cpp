@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <cmath>
+#define _USE_MATH_DEFINES
 
 using namespace std;
 
@@ -76,17 +78,18 @@ void main(){
     fixtureDef.restitutionThreshold = 0.1f;  // Fixes magnetic behavior with slow velocity collisions
     body->CreateFixture(&fixtureDef);
 
-    b2Vec2 force(5.8f, 5.2f);
-    b2Vec2 point(0.0f, 0.0f);
-    body->ApplyForce(force, point, true);
+    //b2Vec2 force(4.8f, 4.2f);
+    //b2Vec2 point(0.0f, 0.0f);
+    //body->ApplyForce(force, point, true);
 
     //Robot bodies
-    float side_length       = 0.075f * scale_factor;
-    float density           = 5.0f;
-    float friction          = 0.1f;
-    float restitution       = 0.01f;
-    float linearDamping     = 20.0f;
-    float angularDamping    = 20.0f;
+    float side_length           = 0.075f * scale_factor;
+    float density               = 5.0f;
+    float friction              = 0.1f;
+    float restitution           = 0.01f;
+    float restitutionThreshold  = 0.1f;
+    float linearDamping         = 20.0f;
+    float angularDamping        = 20.0f;
 
     int number_of_robots = 6;
 
@@ -102,23 +105,16 @@ void main(){
     position[2].Set(-0.8f, -0.5f);
     angle[2] = 1.2f;
     position[3].Set(0.8f, -0.5f);
-    angle[3] = 1.3f;
+    angle[3] = 1.57f;
     position[4].Set(1.5f, 0.5f);
     angle[4] = 1.4f;
     position[5].Set(-1.5f, 0.5f);
     angle[5] = 1.f;
 
     for(int i = 0; i < robots.size(); ++i){
-        robots[i] = Robot(position[i], angle[i], side_length, density, friction, restitution, linearDamping, angularDamping, &world);
+        robots[i] = Robot(position[i], angle[i], side_length, density, friction, restitution, 
+        restitutionThreshold, linearDamping, angularDamping, &world);
     }
-
-    float p1_x = 0.0f;
-    float p1_y = 0.2f;
-    float p2_x = 0.0f;
-    float p2_y = -0.2f;
-
-
-
 
     /*
     b2BodyDef groundBodyDef;
@@ -129,22 +125,6 @@ void main(){
     groundBox.SetAsBox(50.0f, 10.0f);
 
     groundBody->CreateFixture(&groundBox, 0.0f);
-
-    b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(0.0f, 4.0f);
-    b2Body* body = world.CreateBody(&bodyDef);
-
-
-    b2PolygonShape dynamicBox;
-    dynamicBox.SetAsBox(1.0f, 1.0f);
-
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &dynamicBox;
-    fixtureDef.density = 1.0f;
-    fixtureDef.friction = 0.3f;
-
-    body->CreateFixture(&fixtureDef);
     */
 
     float timeStep = 1.0f / 60.0f;
@@ -167,12 +147,12 @@ void main(){
 
         server.read_message();
         if (server.get_send_result() > 0) {
-            printf("Bytes received: %d\n", server.get_send_result());
+            //printf("Bytes received: %d\n", server.get_send_result());
 
             char *data = server.get_message_data();
-            printf("data received: %s\n", data);
+            //printf("data received: %s\n", data);
             if(data[0] == 's'){
-                printf("Sending world state...\n");
+                //printf("Sending world state...\n");
 
                 b2Vec2 position = body->GetPosition();
                 float angle = body->GetAngle();
@@ -181,41 +161,53 @@ void main(){
                 //Ball position
                 sprintf_s(aux,"%.2f %.2f ", position.x, position.y);
                 strcat_s(msg, aux);
-                //Number of robots
-                //sprintf_s(aux,"%zd ", robots.size());
-                //strcat_s(msg, aux);
+
                 //Robots positions and angles
                 for(int i = 0; i < robots.size(); ++i){
                     b2Body* robotBody = robots[i].get_body_ptr();
-                    b2Vec2 position = robotBody->GetPosition();
-                    float angle     = robotBody->GetAngle();
+                    b2Vec2 position   = robotBody->GetPosition();
+                    float angle       = robotBody->GetAngle();
                     sprintf_s(aux,"%.2f %.2f %.2f ", position.x, position.y, angle);
                     strcat_s(msg, aux);
                 }
                 strcat_s(msg, "\n");
-                printf(msg);
+                //printf(msg);
                 server.send_message(msg);
-                printf("Bytes sent: %d\n", server.get_send_result());
+                //printf("Bytes sent: %d\n", server.get_send_result());
 
                 b2Body* robotBody;
-                float robotAngle;
+                float robotAngle, motorAngle;
 
                 //Apply forces
                 for (int i = 0; i < robots.size(); ++i){
                     robotBody  = robots[i].get_body_ptr();
                     robotAngle = robotBody->GetAngle();
+                    motorAngle = robotAngle + (float)M_PI / 2.f;
 
-                    b2Vec2 robotPointMotor1(p1_x, p1_y);
-                    b2Vec2 robotPointMotor2(p2_x, p2_y);
+                    b2Vec2 leftMotorPos  = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
+                    b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
+                    //DEBUG BEGIN
+                    if(i == 2){
+                        printf("Robot: %d\n", i);
+                        printf("left motor pos: %.4f %.4f\n", leftMotorPos.x, leftMotorPos.y);
+                        printf("right motor pos: %.4f %.4f\n", rightMotorPos.x, rightMotorPos.y);
+                        printf("Forces: %.4f %.4f\n", forces[i].first, forces[i].second);
 
-                    b2Vec2 motor1 = robotBody->GetWorldPoint(robotPointMotor1); //Get position of motor 1 in world coord..
-                    b2Vec2 motor2 = robotBody->GetWorldPoint(robotPointMotor2); //Get position of motor 2 in world coord..
-                    
-                    b2Vec2 robotForceMotor1(forces[i].first * cos(robotAngle), forces[i].first* sin(robotAngle));
-                    b2Vec2 robotForceMotor2(forces[i].second * cos(robotAngle), forces[i].second * sin(robotAngle));
+                        b2Vec2 position   = robotBody->GetPosition();
 
-                    robotBody->ApplyForce(robotForceMotor1, motor1, true);
-                    robotBody->ApplyForce(robotForceMotor2, motor2, true);
+                        printf("position: %.4f %.4f\n", position.x, position.y);
+                        printf("angle: %.4f\n", robotAngle);
+                        printf("V1: %.4f %.4f\n", forces[i].first  * cos(motorAngle), forces[i].first  * sin(motorAngle));
+                        printf("V2: %.4f %.4f\n", forces[i].second * cos(motorAngle), forces[i].second * sin(motorAngle));
+                    }
+                    //DEBUG END
+
+                    b2Vec2 leftMotorForce (forces[i].first  * cos(motorAngle), forces[i].first  * sin(motorAngle));
+                    b2Vec2 rightMotorForce(forces[i].second * cos(motorAngle), forces[i].second * sin(motorAngle));
+
+
+                    robotBody->ApplyForce(leftMotorForce,  leftMotorPos,  true);
+                    robotBody->ApplyForce(rightMotorForce, rightMotorPos, true);
                 }
 
                 world.Step(timeStep, velocityIterations, positionIterations);
@@ -282,7 +274,6 @@ void main(){
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
             } else if (data[0] == 'a') {
-
                 printf("Recieving forces definition...\n");
                 memcpy(aux, &data[2], strlen(data)-2);
                 float force_m1;
@@ -298,8 +289,6 @@ void main(){
                 printf(msg);
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
-               
-                
             }
         }
         else if (server.get_send_result() == 0)
@@ -308,7 +297,6 @@ void main(){
             server.close_socket_with_error();
             return;
         }
-
     } while (server.get_send_result() > 0);
 
     if(server.shutdown_server()){

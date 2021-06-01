@@ -50,14 +50,18 @@ class Box2DTCPHandler{
     data = float(split(input, ' '));
     float side_length = box2dtransform.transform_scalar(data[0]);
     int number_of_robots = (int)data[1];
+    //Define robot kinematic model with side_length in meters and wheel radius
+    model  = new RobotKinematicModel(0.1, data[0]);
+    //Initialize robots array
     robots = new Robot[number_of_robots];
     for(int i = 0; i < robots.length; ++i){
-      robots[i] = new Robot(side_length, robot_teams[i]);
+      robots[i] = new Robot(side_length, robot_teams[i], robot_roles[i]);
     }
     if(paused){
       println("Requesting robot description...");
       println(input);
       println("Side length: " + side_length);
+      model._print();
     }
   }
 

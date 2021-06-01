@@ -19,9 +19,9 @@ void setup()
   r2 = new Robot_control(1);
   r3 = new Robot_control(2);
 
-  r1.set_vel_robot(0.1,-1); 
-  r2.set_vel_robot(0.1,-0.5);
-  r3.set_vel_robot(0.1,1);
+  r1.set_vel_robot(-2,0); 
+  r2.set_vel_robot(2,-1);
+  r3.set_vel_robot(2,1);
 
 }
 

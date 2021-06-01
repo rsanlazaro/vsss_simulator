@@ -4,9 +4,9 @@ class Robot_control{
     this.r_id      = r_id;
   }
   void set_vel_robot(float Vl, float Va){
-  println("sending data.."+r_id + " " + Vl + " " + Va);
-  c1.write(r_id + " " + Vl + " " + Va +"\n");
-  delay(20);
+    println("sending data... "+r_id + " " + Vl + " " + Va);
+    c1.write(r_id + " " + Vl + " " + Va +"\n");
+    delay(100);
   }
   
 };

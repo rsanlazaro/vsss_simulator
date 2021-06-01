@@ -1,30 +1,24 @@
-class Robot_kine{
+class RobotKinematicModel{
 
-  float radius;
-  float lenght;
-  float VL,VR;
-  int index;
-
+  float wheel_radius;
+  float lenght_between_wheels;
+  float left_velocity, right_velocity;
   
-  Robot_kine(float radius, float lenght){
-  
-      this.radius = radius;
-      this.lenght = lenght;
-     // this.index = index;
-      println("Defining robot characteristics  " + index +" "+ radius + " " + lenght);
-    }
-  void setSpeed(float L_Speed, float A_Speed){
-    //Making the inverse kinematics
-    VR = (2.0 * L_Speed + A_Speed * lenght) / (2.0 * radius); 
-    VL = (2.0 * L_Speed - A_Speed * lenght) / (2.0 * radius); 
-    
-    //handler.send_velocities(VL, VR, index);
+  RobotKinematicModel(float radius, float lenght){
+    this.wheel_radius          = radius;
+    this.lenght_between_wheels = lenght;
   }
-  void setDifferentialSpeed(float L_Speed, float R_Speed){
-    //Declaring same variables
-    VR = R_Speed;
-    VL = L_Speed;
-    println("Sending robot velocities .. " + VL + " "+ VR);
-    //handler.send_velocities(VL, VR, index);
+  void setSpeed(float linear_velocity, float angular_velocity){
+    //Inverse kinematics
+    left_velocity  = (2.0 * linear_velocity - angular_velocity * lenght_between_wheels) / (2.0 * wheel_radius); 
+    right_velocity = (2.0 * linear_velocity + angular_velocity * lenght_between_wheels) / (2.0 * wheel_radius); 
+  }
+  void setDifferentialSpeed(float left_velocity, float right_velocity){
+    this.left_velocity  = left_velocity;
+    this.right_velocity = right_velocity;
+  }
+  void _print(){
+    println("Wheel radius: " + wheel_radius);
+    println("Length between wheels: " + lenght_between_wheels);
   }
 }
