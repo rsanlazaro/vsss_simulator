@@ -87,11 +87,11 @@ class Box2DTCPHandler{
     }
   }
   
-  void send_velocities(float vl, float vr, int idx){
+  void send_velocities(RobotKinematicModel model, int idx){
     if(paused){
-      println("Setting velocities... VL: " + nf(vl,0,3) + " VR: " + nf(vr,0,3) + " idx: " + idx);
+      println("Setting velocities... VL: " + nf(model.left_velocity,0,3) + " VR: " + nf(model.right_velocity,0,3) + " idx: " + idx);
     }
-    c.write("a " + vl + " " + vr + " " + idx +"\n\0");
+    c.write("a " + model.left_velocity + " " + model.right_velocity + " " + idx +"\n\0");
     // Receive data from server
     while(c.available() == 0);
     input = c.readString();

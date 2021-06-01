@@ -101,7 +101,7 @@ void ClientsTCP(){
         println(data);
         int id = int(data[0]);
         model.setSpeed(data[1], data[2]);
-        handler.send_velocities(model.left_velocity, model.right_velocity, id);
+        handler.send_velocities(model, id);
         println("Robot: " + id);
         println("Left  velocity: " + model.left_velocity);
         println("Right velocity: " + model.right_velocity);
