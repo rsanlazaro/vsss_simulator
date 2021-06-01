@@ -54,6 +54,17 @@ void main(){
     groundFixtureDef.restitution = 1.0f;
     borders->CreateFixture(&groundFixtureDef);
 
+    /*
+    b2BodyDef groundBodyDef;
+    groundBodyDef.position.Set(0.0f, -10.0f);
+    
+    b2Body* groundBody = world.CreateBody(&groundBodyDef);
+    b2PolygonShape groundBox;
+    groundBox.SetAsBox(50.0f, 10.0f);
+
+    groundBody->CreateFixture(&groundBox, 0.0f);
+    */
+
     //Ball Shape
     b2CircleShape circle;
     //circle.m_p.Set(0.0f, 0.0f);
@@ -78,11 +89,10 @@ void main(){
     fixtureDef.restitutionThreshold = 0.1f;  // Fixes magnetic behavior with slow velocity collisions
     body->CreateFixture(&fixtureDef);
 
-    //b2Vec2 force(4.8f, 4.2f);
-    //b2Vec2 point(0.0f, 0.0f);
-    //body->ApplyForce(force, point, true);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //------------------------------------------------ Robots ---------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //Robot bodies
     float side_length           = 0.075f * scale_factor;
     float density               = 5.0f;
     float friction              = 0.1f;
@@ -94,8 +104,8 @@ void main(){
     int number_of_robots = 6;
 
     vector <b2Vec2> position(number_of_robots);
-    vector <float> angle(number_of_robots);
-    vector <Robot> robots(number_of_robots);
+    vector <float>  angle(number_of_robots);
+    vector <Robot>  robots(number_of_robots);
     vector <pair<float, float>> forces(number_of_robots);
 
     position[0].Set(-0.8f, 0.5f);
@@ -116,16 +126,9 @@ void main(){
         restitutionThreshold, linearDamping, angularDamping, &world);
     }
 
-    /*
-    b2BodyDef groundBodyDef;
-    groundBodyDef.position.Set(0.0f, -10.0f);
-    
-    b2Body* groundBody = world.CreateBody(&groundBodyDef);
-    b2PolygonShape groundBox;
-    groundBox.SetAsBox(50.0f, 10.0f);
-
-    groundBody->CreateFixture(&groundBox, 0.0f);
-    */
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //------------------------------------------------ Server ---------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     float timeStep = 1.0f / 60.0f;
     /*
@@ -186,30 +189,15 @@ void main(){
 
                     b2Vec2 leftMotorPos  = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
                     b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
-                    //DEBUG BEGIN
-                    if(i == 2){
-                        printf("Robot: %d\n", i);
-                        printf("left motor pos: %.4f %.4f\n", leftMotorPos.x, leftMotorPos.y);
-                        printf("right motor pos: %.4f %.4f\n", rightMotorPos.x, rightMotorPos.y);
-                        printf("Forces: %.4f %.4f\n", forces[i].first, forces[i].second);
-
-                        b2Vec2 position   = robotBody->GetPosition();
-
-                        printf("position: %.4f %.4f\n", position.x, position.y);
-                        printf("angle: %.4f\n", robotAngle);
-                        printf("V1: %.4f %.4f\n", forces[i].first  * cos(motorAngle), forces[i].first  * sin(motorAngle));
-                        printf("V2: %.4f %.4f\n", forces[i].second * cos(motorAngle), forces[i].second * sin(motorAngle));
-                    }
-                    //DEBUG END
 
                     b2Vec2 leftMotorForce (forces[i].first  * cos(motorAngle), forces[i].first  * sin(motorAngle));
                     b2Vec2 rightMotorForce(forces[i].second * cos(motorAngle), forces[i].second * sin(motorAngle));
-
 
                     robotBody->ApplyForce(leftMotorForce,  leftMotorPos,  true);
                     robotBody->ApplyForce(rightMotorForce, rightMotorPos, true);
                 }
 
+                //Simulate 1 step
                 world.Step(timeStep, velocityIterations, positionIterations);
 
                 //Debug
@@ -302,6 +290,5 @@ void main(){
     if(server.shutdown_server()){
         printf("Server shutdown failed...");
     }
-
     return;
 }
