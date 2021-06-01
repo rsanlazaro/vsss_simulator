@@ -19,6 +19,7 @@ Server s;
 Client c1;
 Client c2;
 String input;
+String commands[];
 float data[];
 
 //1 meter is equivalent to "meterToPixel" pixels
@@ -28,6 +29,7 @@ Field field;
 Ball ball;
 Robot[] robots;
 RobotKinematicModel model;
+float wheel_radius = 0.1;
 
 //robot teams (1 for team 1 and 2 for team 2)
 int[] robot_teams = {1,1,1,2,2,2};
@@ -43,7 +45,7 @@ color midfield_color   = color(0, 255, 0);     //Green-ish
 color forward_color    = color(0, 0, 255);     //Blue-ish
 
 
-boolean paused = true;
+boolean paused = false;
 boolean frame_request = true;
 
 void setup() 
@@ -86,33 +88,29 @@ void draw()
     
     frame_request = false;
     
-
-  c1 = s.available();
-  if (c1 != null) {
-    println("recieving data from client");
-    input = c1.readString();
-    println(input);
-    input = input.substring(0, input.indexOf("\n")); // Only up to the newline
-    println(input);
-    data = float(split(input, ' ')); // Split values into an array
-    model.setSpeed(data[1], data[2]);
-    int id = int(data[0]);
-    handler.send_velocities(model.left_velocity, model.right_velocity, id);
-    println("Robot: " + id);
-    println("Left  velocity: " + model.left_velocity);
-    println("Right velocity: " + model.right_velocity);
-  }
-/*  c2 = s.available();
-  if (c2 != null) {
-    println("recieving data from client");
-    input = c1.readString();
-
-    input = input.substring(0, input.indexOf("\n")); // Only up to the newline
-    data = float(split(input, ' ')); // Split values into an array
-    robot_kine.setSpeed(data[1], data[2]);
-    int id = int(data[0]);
-    handler.send_velocities(robot_kine.VL, robot_kine.VR, id);
-  }*/
+    //Recieve data from clients
+    c1 = s.available();
+    if (c1 != null) {
+      println("Recieving data from client");
+      input = c1.readString();
+      println(input);
+      commands = split(input, '\n');
+      for(int i = 0; i < commands.length; ++i){
+        data = float(split(commands[i], ' '));
+        if(data.length < 3){
+          break;
+        }
+        println(commands[i]);
+        println(data);
+        int id = int(data[0]);
+        model.setSpeed(data[1], data[2]);
+        handler.send_velocities(model.left_velocity, model.right_velocity, id);
+        println("Robot: " + id);
+        println("Left  velocity: " + model.left_velocity);
+        println("Right velocity: " + model.right_velocity);
+      }
+    }
+    
   }
 }
 

@@ -51,7 +51,7 @@ class Box2DTCPHandler{
     float side_length = box2dtransform.transform_scalar(data[0]);
     int number_of_robots = (int)data[1];
     //Define robot kinematic model with side_length in meters and wheel radius
-    model  = new RobotKinematicModel(0.1, data[0]);
+    model  = new RobotKinematicModel(wheel_radius, data[0]);
     //Initialize robots array
     robots = new Robot[number_of_robots];
     for(int i = 0; i < robots.length; ++i){
