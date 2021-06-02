@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import math
 
 ########            COLORS            ########
 # Limit for robot color
@@ -43,7 +44,7 @@ def robot_present(img, threshold=0.8):
     else:
         return False
 
-def get_role(img_hsv, robot_cropped, robot):
+def get_role(img_hsv, robot_cropped):
     # counter = 1
     # plt.figure(figsize=(20, 20))
     for j in range(len(role_colors)):
@@ -56,7 +57,7 @@ def get_role(img_hsv, robot_cropped, robot):
 
         # Classify by teams
         if robot_present(result):
-            cv.imshow(str(robot), result)
+            # cv.imshow(str(robot), result)
             if j == 0:
                 return 'G'
             if j == 1:
@@ -64,6 +65,33 @@ def get_role(img_hsv, robot_cropped, robot):
             if j == 2:
                 return "F"
 
+def get_orientation(result):
+    x2 = result.shape[0]/2
+    y2 = result.shape[1]/2
+
+    robot_contours, _     = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    robot_contours_poly   = [None]*len(robot_contours)
+    robot_boundRect       = [None]*len(robot_contours)
+    robot_centers         = [None]*len(robot_contours)
+    robot_radius          = [None]*len(robot_contours)
+    
+    for i, c in enumerate(robot_contours):
+        robot_contours_poly[i] = cv.approxPolyDP(c, 3, True)
+        robot_boundRect[i] = cv.boundingRect(robot_contours_poly[i])
+        robot_centers[i], robot_radius[i] = cv.minEnclosingCircle(robot_contours_poly[i])
+
+    radians = math.atan2(robot_centers[0][1]-y2, robot_centers[0][0]-x2)
+    degrees = math.degrees(radians)
+    return degrees + 45 # Offset for orientation to be centered
+
+def draw_orientation(robot_position, orientation, robots_img):
+    # print("Robot: {} {}".format(robot_position, orientation))
+    a = orientation
+    l = 25
+    p1 = (int(robot_position[0]), int(robot_position[1]))
+    p2 = (int(p1[0] + l * math.cos(a * math.pi / 180.0)), int(p1[1] + l * math.sin(a * math.pi / 180.0)))
+    image = cv.arrowedLine(robots_img, p1, p2, (0,0,255), 3)
+    return image
 
 if not obs_camera.isOpened():
         print("Cannot open camera")
@@ -104,12 +132,7 @@ while True:
         robots_centers[i], robots_radius[i] = cv.minEnclosingCircle(robots_contours_poly[i])
         robots_cropped[i] = robots_img[robots_boundRect[i][1]:robots_boundRect[i][1] + robots_boundRect[i][3], robots_boundRect[i][0]:robots_boundRect[i][0] + robots_boundRect[i][2]].copy()
     
-    t1_robots = []
-    t2_robots = []
-
-    t1_roles = []
-    t2_roles = []
-
+  
     for i, c in enumerate(robots_cropped):
         img_hsv = cv.cvtColor(robots_cropped[i], cv.COLOR_RGB2HSV)
         # Apply color filter of teams to determine robot team
@@ -119,25 +142,34 @@ while True:
             # Classify by teams
             if robot_present(result):
                 if j == 0:
-                    t1_robots.append(i)
-                    t1_roles.append(get_role(img_hsv, robots_cropped[i], i))
+                    role = get_role(img_hsv, robots_cropped[i])
+                    # Set robots position and orientation
+                    t1_info[role][0] = robots_centers[i]
+                    t1_info[role][1] = get_orientation(result)
+                    
                     # Draw identifiers on screen
                     cv.putText(robots_img, "T1:", (int(robots_centers[i][0]), int(robots_centers[i][1])),
                         cv.FONT_HERSHEY_SIMPLEX, 0.5, (248, 65, 209), 2)
-                    cv.putText(robots_img, t1_roles[-1], (int(robots_centers[i][0] + 30), int(robots_centers[i][1])),
+                    cv.putText(robots_img, role, (int(robots_centers[i][0] + 30), int(robots_centers[i][1])),
                         cv.FONT_HERSHEY_SIMPLEX, 0.5, (248, 65, 209), 2)
+                    # print(t1_info)
+                    robots_img = draw_orientation(t1_info[role][0], t1_info[role][1],robots_img)
                 else:
-                    t2_robots.append(i)
-                    t2_roles.append(get_role(img_hsv, robots_cropped[i], i))
+                    role = get_role(img_hsv, robots_cropped[i])
+                    # Set robots position and orientation
+                    t2_info[role][0] = robots_centers[i]
+                    t2_info[role][1] = get_orientation(result)
+
                     # Draw identifiers on screen
                     cv.putText(robots_img, "T2", (int(robots_centers[i][0]), int(robots_centers[i][1])),
                         cv.FONT_HERSHEY_SIMPLEX, 0.5, (57, 242, 248), 2) # BGR
-                    cv.putText(robots_img, t2_roles[-1], (int(robots_centers[i][0] + 30), int(robots_centers[i][1])),
+                    cv.putText(robots_img, role, (int(robots_centers[i][0] + 30), int(robots_centers[i][1])),
                         cv.FONT_HERSHEY_SIMPLEX, 0.5, (57, 242, 248), 2) # BGR
+                    robots_img = draw_orientation(t2_info[role][0], t2_info[role][1],robots_img)
+                    
+                
 
-    print("t1 {} {} t2 {} {}".format(t1_robots, t1_roles, t2_robots, t2_roles))
-    
-    
+    # print(t2_info)
 
     # Program Termination
     cv.imshow("Robots", robots_img)
