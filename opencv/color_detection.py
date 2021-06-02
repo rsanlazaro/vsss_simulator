@@ -45,15 +45,9 @@ def robot_present(img, threshold=0.8):
         return False
 
 def get_role(img_hsv, robot_cropped):
-    # counter = 1
-    # plt.figure(figsize=(20, 20))
     for j in range(len(role_colors)):
         mask = cv.inRange(img_hsv, role_colors[j][0], role_colors[j][1]) 
         result = cv.bitwise_and(robot_cropped, robot_cropped, mask=mask)
-
-        # plt.subplot(1, 18, counter) # this can be deleted
-        # plt.imshow(result)
-        # counter = counter + 1
 
         # Classify by teams
         if robot_present(result):
@@ -68,7 +62,7 @@ def get_role(img_hsv, robot_cropped):
 def get_orientation(result):
     x2 = result.shape[0]/2
     y2 = result.shape[1]/2
-
+    # This were left as they might be useful, although only robot_radius is being used right now
     robot_contours, _     = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     robot_contours_poly   = [None]*len(robot_contours)
     robot_boundRect       = [None]*len(robot_contours)
@@ -85,7 +79,6 @@ def get_orientation(result):
     return degrees + 45 # Offset for orientation to be centered
 
 def draw_orientation(robot_position, orientation, robots_img):
-    # print("Robot: {} {}".format(robot_position, orientation))
     a = orientation
     l = 25
     p1 = (int(robot_position[0]), int(robot_position[1]))
@@ -99,10 +92,9 @@ if not obs_camera.isOpened():
     
 # Start a while loop
 while True:
-      
-    # Reading the video from the
-    # webcam in image frames
+    # Read new frame from OBS
     ret, imageFrame = obs_camera.read()
+
     # if frame is read correctly ret is True
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
@@ -119,7 +111,7 @@ while True:
     # Apply mask   
     robots_img = cv.bitwise_and(imageFrame, imageFrame, mask = robot_mask)
     
-    # Find individual robots
+    # Find individual robots properties
     robots_contours, _      = cv.findContours(robot_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     robots_contours_poly    = [None]*len(robots_contours)
     robots_boundRect        = [None]*len(robots_contours)
@@ -130,19 +122,20 @@ while True:
         robots_contours_poly[i] = cv.approxPolyDP(c, 3, True)
         robots_boundRect[i] = cv.boundingRect(robots_contours_poly[i])
         robots_centers[i], robots_radius[i] = cv.minEnclosingCircle(robots_contours_poly[i])
+        # Generate RoI of each robot found, later filters are only applied to this images
         robots_cropped[i] = robots_img[robots_boundRect[i][1]:robots_boundRect[i][1] + robots_boundRect[i][3], robots_boundRect[i][0]:robots_boundRect[i][0] + robots_boundRect[i][2]].copy()
     
-  
-    for i, c in enumerate(robots_cropped):
-        img_hsv = cv.cvtColor(robots_cropped[i], cv.COLOR_RGB2HSV)
-        # Apply color filter of teams to determine robot team
+    # Iterate over each robot found, determine team, role, and save position and orientation
+    for i, robot_cropped in enumerate(robots_cropped):
+        img_hsv = cv.cvtColor(robot_cropped, cv.COLOR_RGB2HSV)
+        # Determine obot team
         for j in range(len(teams_colors)):
             mask = cv.inRange(img_hsv, teams_colors[j][0], teams_colors[j][1]) 
-            result = cv.bitwise_and(robots_cropped[i], robots_cropped[i], mask=mask)
-            # Classify by teams
+            result = cv.bitwise_and(robot_cropped, robot_cropped, mask=mask)
+            # Classify by teams and save robot properties
             if robot_present(result):
                 if j == 0:
-                    role = get_role(img_hsv, robots_cropped[i])
+                    role = get_role(img_hsv, robot_cropped)
                     # Set robots position and orientation
                     t1_info[role][0] = robots_centers[i]
                     t1_info[role][1] = get_orientation(result)
@@ -152,10 +145,9 @@ while True:
                         cv.FONT_HERSHEY_SIMPLEX, 0.5, (248, 65, 209), 2)
                     cv.putText(robots_img, role, (int(robots_centers[i][0] + 30), int(robots_centers[i][1])),
                         cv.FONT_HERSHEY_SIMPLEX, 0.5, (248, 65, 209), 2)
-                    # print(t1_info)
                     robots_img = draw_orientation(t1_info[role][0], t1_info[role][1],robots_img)
                 else:
-                    role = get_role(img_hsv, robots_cropped[i])
+                    role = get_role(img_hsv, robot_cropped)
                     # Set robots position and orientation
                     t2_info[role][0] = robots_centers[i]
                     t2_info[role][1] = get_orientation(result)
@@ -174,10 +166,6 @@ while True:
     # Program Termination
     cv.imshow("Robots", robots_img)
 
-    # print("T1 -  R1 {} R2 {} R3 {}    T2 -  R1 {} R2 {} R3 {}".format(
-    #     robots_centers[t1_robots[0]], robots_centers[t1_robots[1]], robots_centers[t1_robots[2]],
-    #     robots_centers[t2_robots[0]], robots_centers[t2_robots[1]], robots_centers[t2_robots[2]]
-    #     ))
     if cv.waitKey(10) & 0xFF == ord('q'):
         obs_camera.release()
         cv.destroyAllWindows()
