@@ -3,8 +3,9 @@ import cv2 as cv
 import math
 
 ########            COLORS            ########
-# Limit for robot color
+# Limits for robot and ball colors
 robot_color     = [(80, 50, 80), (140, 255, 255)]
+ball_color      = [(5, 50, 80), (20, 255, 255)]
 # Limits for team colors
 t1_color        = [(130, 50, 50), (160, 255, 255)]     # Purple ish
 t2_color        = [(80, 50, 60), (100, 255, 255)]      # Yellow-ish
@@ -102,15 +103,29 @@ while True:
 
     # Convert To HSV
     hsvFrame = cv.cvtColor(imageFrame, cv.COLOR_BGR2HSV)
-    # Create Robot Mask
+    # Create Robot and ball Masks
     robot_mask = cv.inRange(hsvFrame, robot_color[0], robot_color[1]) 
+    ball_mask = cv.inRange(hsvFrame, ball_color[0], ball_color[1]) 
     # Fill holes
     contours, hierarchy = cv.findContours(robot_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
         cv.fillPoly(robot_mask, pts=[contour], color=(255, 255, 255))
     # Apply mask   
-    robots_img = cv.bitwise_and(imageFrame, imageFrame, mask = robot_mask)
+    robots_img  = cv.bitwise_and(imageFrame, imageFrame, mask = robot_mask)
+    ball_img    = cv.bitwise_and(imageFrame, imageFrame, mask = ball_mask)
     
+    # Find individual robots properties
+    ball_contour, _             = cv.findContours(ball_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    ball_contours_poly          = [None]*len(ball_contour)
+    ball_boundRect              = [None]*len(ball_contour)
+    ball_centers                = [None]*len(ball_contour)
+    ball_radius                 = [None]*len(ball_contour)
+    ball_contours_poly          = cv.approxPolyDP(ball_contour[0], 3, True)
+    ball_boundRect              = cv.boundingRect(ball_contours_poly)
+    ball_centers, ball_radius   = cv.minEnclosingCircle(ball_contours_poly)
+    t1_info["B"] = ball_centers
+    t2_info["B"] = ball_centers
+
     # Find individual robots properties
     robots_contours, _      = cv.findContours(robot_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     robots_contours_poly    = [None]*len(robots_contours)
@@ -160,10 +175,11 @@ while True:
                     robots_img = draw_orientation(t2_info[role][0], t2_info[role][1],robots_img)
                     
                 
-
-    # print(t2_info)
+    cv.circle(robots_img, (int(t2_info["B"][0]), int(t2_info["B"][1])), 5, (0, 128, 255), 2, 8)
+    print(t2_info["B"])
 
     # Program Termination
+    #cv.imshow("Robots", ball_img)
     cv.imshow("Robots", robots_img)
 
     if cv.waitKey(10) & 0xFF == ord('q'):
