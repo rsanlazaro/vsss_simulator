@@ -20,17 +20,18 @@ class Robot{
     pushMatrix();
     translate(position.x, position.y);
     rotate(-angle);
-    
+    // Create robot body
     fill(robots_color);
     rect(0, 0, side_length, side_length);
+    // Create team circle
     if(team == 1){
       fill(team_1_color);
     } else{
       fill(team_2_color);
     }
+    circle(-side_length/4., -side_length/4., side_length/4.);
     
-    
-    
+    // Create role circle   
     if(role == 1){
       fill(goalkeeper_color);
     } else if(role == 2){
