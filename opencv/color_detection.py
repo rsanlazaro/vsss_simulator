@@ -9,13 +9,9 @@ t1_color        = [(130, 50, 50), (160, 255, 255)]     # Purple ish
 t2_color        = [(80, 50, 60), (100, 255, 255)]      # Yellow-ish
 teams_colors    = [t1_color, t2_color]
 # Limits for role colors
-goal_color      = [(0, 0, 0), (255, 255, 255)]       # Red-ish
-mid_color       = goal_color     # Green-ish
-for_color       = goal_color    # Blue-ish
-
-# goal_color      = [(156, 0, 0), (200, 255, 255)]       # Red-ish
-# mid_color       = [(50, 150, 200), (70, 255, 255)]     # Green-ish
-# for_color       = [(110, 100, 60), (125, 255, 255)]    # Blue-ish
+goal_color      = [(100, 0, 0), (150, 255, 255)]        # Red-ish
+mid_color       = [(50, 100, 0), (70, 255, 255)]       # Green-ish
+for_color       = [(0, 100, 0), (20, 255, 255)]     # Blue-ish
 
 role_colors     = [goal_color, mid_color, for_color]
 
