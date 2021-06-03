@@ -5,6 +5,6 @@ class Robot_control{
   }
   void set_vel_robot(float Vl, float Va){
     println("sending data... " + r_id + " " + Vl + " " + Va);
-    c1.write(r_id + " " + Vl + " " + Va + "\n");
+    c1.write(r_id + " " + Vl + " " + Va + "\n\0");
   }
 };
