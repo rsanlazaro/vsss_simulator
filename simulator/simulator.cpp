@@ -147,15 +147,16 @@ void main(){
     }
     // Receive until the peer shuts down the connection
     do {
-
+        
         server.read_message();
         if (server.get_send_result() > 0) {
+            memset(aux, 0, DEFAULT_BUFLEN);
             //printf("Bytes received: %d\n", server.get_send_result());
 
             char *data = server.get_message_data();
             //printf("data received: %s\n", data);
             if(data[0] == 's'){
-                //printf("Sending world state...\n");
+               // printf("Sending world state...\n");
 
                 b2Vec2 position = body->GetPosition();
                 float angle = body->GetAngle();
@@ -261,7 +262,10 @@ void main(){
                 printf(msg);
                 server.send_message(msg);
                 printf("Bytes sent: %d\n", server.get_send_result());
+
+
             } else if (data[0] == 'a') {
+                printf("\n");
                 printf("Recieving forces definition...\n");
                 memcpy(aux, &data[2], strlen(data)-2);
                 float force_m1;
@@ -269,14 +273,14 @@ void main(){
                 int idx;
                 printf("aux: %s\n", aux);
                 sscanf_s(aux, "%f %f %d", &force_m1, &force_m2, &idx);
-                printf("\nForce 1: %.2f Force 2: %.2f idx: %d\n\n", force_m1, force_m2, idx);
+                //printf("\nForce 1: %.2f Force 2: %.2f idx: %d\n\n", force_m1, force_m2, idx);
                 forces[idx] = {force_m1, force_m2};
-                msg[0] = 'K';
-                msg[1] = '\n';
-                msg[2] = '\0';
-                printf(msg);
-                server.send_message(msg);
-                printf("Bytes sent: %d\n", server.get_send_result());
+               // msg[0] = 'K';
+               // msg[1] = '\n';
+               // msg[2] = '\0';
+               // printf(msg);
+               // server.send_message(msg);
+               // printf("Bytes sent: %d\n", server.get_send_result());
             }
         }
         else if (server.get_send_result() == 0)

@@ -2,6 +2,8 @@ class Box2DTCPHandler{
   
   Client c;
   String input;
+  String input_ws;
+  float[] data_ws;
   float[] data;
   Box2DTransform box2dtransform;
   
@@ -67,6 +69,7 @@ class Box2DTCPHandler{
 
   void request_world_state(){
     c.write("s\n\0");
+    println("sending S...");
     // Receive data from server
     while(c.available() == 0);
     input = c.readString();
@@ -78,12 +81,12 @@ class Box2DTCPHandler{
     }
     ball.set_position(box2dtransform.transform_point(new Point(data[0], data[1])));
     for(int i = 0; i < robots.length; ++i){
-      robots[i].set_position(box2dtransform.transform_point(new Point(data[i*3+2], data[i*3+3])));
-      robots[i].set_angle(data[i*3+4]);
+      robots[i].set_position(box2dtransform.transform_point(new Point(data_ws[i*3+2], data_ws[i*3+3])));
+      robots[i].set_angle(data_ws[i*3+4]);
     }
     if(paused){
       println("Requesting world state...");
-      println(input);
+      println(input_ws);
       ball._print();
       for(int i = 0; i < robots.length; ++i){
         robots[i]._print();
@@ -96,10 +99,12 @@ class Box2DTCPHandler{
       println("Setting velocities... VL: " + nf(model.left_velocity,0,3) + " VR: " + nf(model.right_velocity,0,3) + " idx: " + idx);
     }
     c.write("a " + model.left_velocity + " " + model.right_velocity + " " + idx +"\n\0");
+    println("Sending A.. ");
     // Receive data from server
     while(c.available() == 0);
     input = c.readString();
     input = input.substring(0, input.indexOf("\n"));
+    println("sv_leido...");
   }
 
 };
