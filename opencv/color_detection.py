@@ -32,7 +32,7 @@ t2_info = {
 }
 
 ########            STREAM PARAMETERS            ########
-obs_camera = cv.VideoCapture(2)
+obs_camera = cv.VideoCapture(3)
 obs_camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
 obs_camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 

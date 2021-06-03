@@ -33,4 +33,4 @@ def check_multiple():
             continue
 
 #check_multiple() # 2 is index of OBS Virtual Camera , 0 is index of OBS-Camera
-check_cam_by_index(2) 
+check_cam_by_index(3) 
