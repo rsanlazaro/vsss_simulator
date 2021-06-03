@@ -73,8 +73,9 @@ class Box2DTCPHandler{
     input = input.substring(0, input.indexOf("\n"));
     println(input);
     data = float(split(input, ' '));
-    println("ball data: ");
-    println(data);
+    if(data.length < 20){
+      return;
+    }
     ball.set_position(box2dtransform.transform_point(new Point(data[0], data[1])));
     for(int i = 0; i < robots.length; ++i){
       robots[i].set_position(box2dtransform.transform_point(new Point(data[i*3+2], data[i*3+3])));
