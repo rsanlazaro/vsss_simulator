@@ -27,13 +27,12 @@ int[] robot_teams = {1,1,1,2,2,2};
 int[] robot_roles = {1,2,3,1,2,3};
 
 int background_color = 15;
-color ball_color       = color(255, 128, 0);   //Orange-ish
-color robots_color     = color(113, 190, 202);  //turquoise-ish
-color team_1_color     = color(209, 65, 248); //Purple-ish
-color team_2_color     = color(248, 242, 57);  //Yellow-ish
-color goalkeeper_color = color(255, 0, 0);     //Red-ish
-color midfield_color   = color(0, 255, 0);     //Green-ish
-color forward_color    = color(0, 0, 255);     //Blue-ish
+color ball_color       = color(255, 128, 0);    // Orange-ish
+color team_1_color     = color(0, 0, 255);      // Blue
+color team_2_color     = color(255, 255, 0);    // Yellow
+color goalkeeper_color = color(0, 255, 0);      // Green
+color midfield_color   = color(26, 238, 255);   // Cyan
+color striker_color    = color(230, 25, 255);   // Purple
 
 
 boolean paused = false;
