@@ -198,8 +198,7 @@ class Vision
             this.angle=PVector.sub(vertex3[0],u).heading()*180/PI;
             }
         }
-        // this.angle=180 - this.angle-45; 
-        this.angle = 180 ; 
+        this.angle=180 - this.angle-45; 
         if (this.angle<0){
             this.angle = this.angle+360;
         }

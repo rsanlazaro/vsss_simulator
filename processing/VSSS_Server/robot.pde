@@ -36,9 +36,9 @@ class Robot{
     } else{
       fill(striker_color);
     }
-    circle(side_length/4., side_length/4., side_length/4.);
-    circle(-side_length/4., side_length/4., side_length/4.);
-    circle(-side_length/4., -side_length/4., side_length/4.);
+    circle(side_length/4., side_length/4., side_length/6.);
+    circle(-side_length/4., side_length/4., side_length/6.);
+    circle(side_length/4., -side_length/4., side_length/6.);
     popMatrix();
   }
   void _print(){
