@@ -1,6 +1,6 @@
 #include "PID.hpp"
-
-
+#include <iostream>
+using namespace std;
 PID::PID() {
 
 	integrator = 0.0f;
@@ -11,9 +11,12 @@ PID::PID() {
 	uk_1 = 0.0f;
 	yk_1 = 0.0f;
 	yk = 0.0f;
-
+	Ki = 6.3329f;
+	Kd = 0.0f;
+	Kp = 6.3329f;
 	out = 0.0f;
-}
+}	
+	
 
 
 
@@ -22,11 +25,12 @@ float PID::PID_UD(float setpoint, float measurement) { //Set point y measurement
 	float error = setpoint - measurement;
 	
 	float proportional = Kp * error;
-	integrator = integrator + 0.5f * Ki * T * (error + prevError);
-
+	
+	integrator = integrator + 0.5f * Ki * 0.0166f * (error + prevError);
+	
 	float limMinInt, limMaxInt;
 
-	if (limMax > proportional) {
+	/*if (limMax > proportional) {
 		limMaxInt = limMax - proportional;
 	}else{
 		limMaxInt = 0.0f;
@@ -42,27 +46,28 @@ float PID::PID_UD(float setpoint, float measurement) { //Set point y measurement
 	}
 	else if (integrator < limMinInt) {
 		integrator = limMinInt;
-	}
+	}*/
 
 	differentiator = (2.0f * Kd * (measurement - prevMeasurement)
-		+ (2.0f * tau - T) * differentiator)
-		/ (2.0f * tau + T);
-
+		+ (2.0f * tau - 0.0166f) * differentiator)
+		/ (2.0f * tau + 0.0166);
+	
 		out = proportional + integrator + differentiator;
-
-		if (out > limMax) {
-			out = limMax;
+		//cout << out << endl;
+		if (out > 10.0f) {
+			out = 10.0f;
 		}
-		else if (out < limMin) {
-			out = limMin;
+		else if (out < -10.0f) {
+			out = -10.0f;
 		}
+		
 		prevError = error;
 		prevMeasurement = measurement;
 		uk = out;
 		yk = uk_1 * (uk * 0.02864f + uk_1 * 0.0286f) + yk_1 * 0.7469f;
 		uk_1 = uk;
 		yk_1 = yk;
-
+		cout << "error = "<<error << "   previous error = " << prevError<< endl;
 
 
 			return yk;

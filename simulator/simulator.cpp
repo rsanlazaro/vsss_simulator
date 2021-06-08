@@ -23,8 +23,10 @@ using namespace std;
 
 
 void main(){
+   // PID();
     fstream file;
     auto start = std::chrono::steady_clock::now();
+    PID control = PID();
    // ofstream file("data.txt", ios::app);
     //Scale factors for box2d objects to fit between 0.1 and 10 m
     float scale_factor = 5;
@@ -52,7 +54,7 @@ void main(){
     groundBodyDef.position.Set(0.0f, 0.0f);
 
     b2Body* borders = world.CreateBody(&groundBodyDef);
-
+    
     b2FixtureDef groundFixtureDef;
     groundFixtureDef.shape = &chain;
     //groundFixtureDef.density = 10.0f;
@@ -178,6 +180,7 @@ void main(){
                     b2Vec2 position   = robotBody->GetPosition();
                     float angle       = robotBody->GetAngle();
                     sprintf_s(aux, "%.2f %.2f %.2f ", position.x, position.y, angle);
+                    cout << position.x << "\t" << position.y << "\n";
                     strcat_s(msg, aux);
                 }
                 printf("\n");
@@ -200,11 +203,12 @@ void main(){
 
                     float RPS_L = (2*(sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) - w_speed * 0.4f)  / (2 * 0.1f * 2 * M_PI);
                     float RPS_R = (2 * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) + w_speed * 0.4f) / (2 * 0.1f * 2 * M_PI);
-                    float Desired_RPS_L = 0.0f;
-                    float Desired_RPS_R = 0.0f;
-                    PID control = PID();
+                    float Desired_RPS_L = -2.0f;
+                    float Desired_RPS_R = 2.0f;
+                    
                     float Y_PID_L = control.PID_UD(Desired_RPS_L, RPS_L);
-                    float Y_PID_R = control.PID_UD(Desired_RPS_L, RPS_L);
+                    float Y_PID_R = control.PID_UD(Desired_RPS_R, RPS_R);
+                    cout <<"pid  L = "<<Y_PID_L << "     pid  R = " << Y_PID_R << "\n";
                     
                     motorAngle = robotAngle + (float)M_PI / 2.f;
 
