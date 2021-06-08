@@ -96,8 +96,8 @@ void main(){
     float side_length           = 0.075f * scale_factor;
     float density               = 5.0f;
     float friction              = 0.1f;
-    float restitution           = 0.01f;
-    float restitutionThreshold  = 0.1f;
+    float restitution           = 0.0f;
+    float restitutionThreshold  = 0.2f;
     float linearDamping         = 20.0f;
     float angularDamping        = 20.0f;
 
@@ -108,18 +108,18 @@ void main(){
     vector <Robot>  robots(number_of_robots);
     vector <pair<float, float>> forces(number_of_robots);
 
-    position[0].Set(-0.8f, 0.5f);
+    position[0].Set(-3.5f, 2.7f);
     angle[0] = 0.f;
     position[1].Set(0.8f, 0.5f);
-    angle[1] = 1.1f;
+    angle[1] = 0.f;
     position[2].Set(-0.8f, -0.5f);
-    angle[2] = 1.2f;
+    angle[2] = 0.f;
     position[3].Set(0.8f, -0.5f);
-    angle[3] = 1.57f;
+    angle[3] = 0.f;
     position[4].Set(1.5f, 0.5f);
-    angle[4] = 1.4f;
+    angle[4] = 0.f;
     position[5].Set(-1.5f, 0.5f);
-    angle[5] = 1.f;
+    angle[5] = 0.f;
 
     for(int i = 0; i < robots.size(); ++i){
         robots[i] = Robot(position[i], angle[i], side_length, density, friction, restitution, 
@@ -137,6 +137,16 @@ void main(){
     */
     int32 velocityIterations = 12;
     int32 positionIterations = 10;
+
+    //Vector for ki
+    vector <float> sum_w_l(number_of_robots);
+    vector <float> sum_w_r(number_of_robots);
+    float max_acceleration = 3.0f; //3 m/s^2
+    float robots_mass = robots[0].get_body_ptr()->GetMass();
+    float max_motor_torque = robots_mass * max_acceleration / 2.0f * 20.0f;
+
+    printf("robot mass: %.2f\n", robots_mass);
+    printf("max motor torque: %.2f\n", max_motor_torque);
 
     char msg[DEFAULT_BUFLEN];
     char aux[DEFAULT_BUFLEN];
@@ -181,17 +191,76 @@ void main(){
                 b2Body* robotBody;
                 float robotAngle, motorAngle;
 
+                //controller variables
+                float wheel_radius = 0.1f;
+                float length_between_wheels = 0.2f;
+
                 //Apply forces
                 for (int i = 0; i < robots.size(); ++i){
                     robotBody  = robots[i].get_body_ptr();
                     robotAngle = robotBody->GetAngle();
                     motorAngle = robotAngle + (float)M_PI / 2.f;
 
+                    //Controller 
+                    b2Vec2 linear_velocity = robotBody->GetLinearVelocity();
+                    float angular_velocity = robotBody->GetAngularVelocity();
+
+                    //Vector projection
+                    b2Vec2 robotOrientation = b2Vec2(cos(robotAngle), sin(robotAngle));
+                    float scalar = (robotOrientation.x * linear_velocity.x + robotOrientation.y * linear_velocity.y) / robotOrientation.LengthSquared();
+                    b2Vec2 longitudinal_velocity = scalar * robotOrientation;
+                    float long_vel_magn = longitudinal_velocity.Length();
+
+                    float w_l  = (2.0f * long_vel_magn - angular_velocity * length_between_wheels) / (2.0f * wheel_radius); 
+                    float w_r  = (2.0f * long_vel_magn + angular_velocity * length_between_wheels) / (2.0f * wheel_radius); 
+
+                    //Desired velocities
+                    float w_l_d  = (2.0f * forces[i].first - forces[i].second * length_between_wheels) / (2.0f * wheel_radius); 
+                    float w_r_d  = (2.0f * forces[i].first + forces[i].second * length_between_wheels) / (2.0f * wheel_radius);
+
+                    float diff_w_l = w_l_d - w_l;
+                    float diff_w_r = w_r_d - w_r;
+
+
+                    sum_w_l[i] += diff_w_l;
+                    sum_w_r[i] += diff_w_r;
+
+                    sum_w_l[i] = min(max(sum_w_l[i], -1000.0f), 1000.0f);
+                    sum_w_r[i] = min(max(sum_w_r[i], -1000.0f), 1000.0f);
+
+                    //float Kp = 1.2f;
+                    //float Ki = 0.01f;
+                    float Kp = 2.5f;
+                    float Ki = 0.5f;
+                    float L = Kp * diff_w_l + Ki * sum_w_l[i];
+                    float R = Kp * diff_w_r + Ki * sum_w_r[i];
+                    //Limit max torque
+                    L = min(max(L, -max_motor_torque), max_motor_torque);
+                    R = min(max(R, -max_motor_torque), max_motor_torque);
+                    if(i == 0){
+                        printf("[diff] wl: %.2f wr: %.2f\n", diff_w_l, diff_w_r);
+                        printf("[diff] L: %.2f R: %.2f\n", L, R);
+                        printf("linear velocity: %.2f %.2f\n", linear_velocity.x, linear_velocity.y);
+                        printf("angular velocity: %.2f\n", angular_velocity);
+                        printf("angle: %.2f\n", robotAngle);
+                        printf("orientation: %.2f %.2f\n", robotOrientation.x, robotOrientation.y);
+                        printf("longitudinal velocity: %.2f %.2f\n", longitudinal_velocity.x, longitudinal_velocity.y);
+                        printf("long vel magnitud: %.4f\n", long_vel_magn);
+                    }
+
+                    //printf("[current] wl: %.2f wr: %.2f\n", w_l, w_r);
+                    //printf("[desired] wl: %.2f wr: %.2f\n", w_l_d, w_r_d);
+                    
+                    //printf("angle: %.2f\n", robotAngle);
+                    //printf("orientation: %.2f %.2f\n", robotOrientation.x, robotOrientation.y);
+                    //printf("longitudinal velocity: %.2f %.2f\n", longitudinal_velocity.x, longitudinal_velocity.y);
+
+
                     b2Vec2 leftMotorPos  = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
                     b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
 
-                    b2Vec2 leftMotorForce (forces[i].first  * cos(motorAngle), forces[i].first  * sin(motorAngle));
-                    b2Vec2 rightMotorForce(forces[i].second * cos(motorAngle), forces[i].second * sin(motorAngle));
+                    b2Vec2 leftMotorForce (L * cos(robotAngle), L * sin(robotAngle));
+                    b2Vec2 rightMotorForce(R * cos(robotAngle), R * sin(robotAngle));
 
                     robotBody->ApplyForce(leftMotorForce,  leftMotorPos,  true);
                     robotBody->ApplyForce(rightMotorForce, rightMotorPos, true);

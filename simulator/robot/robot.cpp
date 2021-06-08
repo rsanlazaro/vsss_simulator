@@ -21,8 +21,8 @@ const float &restitution, const float &restitutionThreshold, const float &linear
     dynamicBox.SetAsBox(size/2.f, size/2.f);
 
     //Set left and right motor positions
-    leftMotorPos  = b2Vec2(-size/2.f, 0.f);
-    rightMotorPos = b2Vec2(size/2.f, 0.f);
+    leftMotorPos  = b2Vec2(0.f, size/2.f);
+    rightMotorPos = b2Vec2(0.f, -size/2.f);
 
     //Fixture definition
     fixtureDef.shape                = &dynamicBox;

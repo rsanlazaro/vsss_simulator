@@ -38,7 +38,7 @@ class Robot{
     }
     circle(side_length/4., side_length/4., side_length/6.);
     circle(-side_length/4., side_length/4., side_length/6.);
-    circle(side_length/4., -side_length/4., side_length/6.);
+    circle(-side_length/4., -side_length/4., side_length/6.);
     popMatrix();
   }
   void _print(){

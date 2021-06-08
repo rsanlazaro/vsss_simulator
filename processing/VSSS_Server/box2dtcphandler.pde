@@ -71,7 +71,6 @@ class Box2DTCPHandler{
     while(c.available() == 0);
     input = c.readString();
     input = input.substring(0, input.indexOf("\n"));
-    println(input);
     data = float(split(input, ' '));
     if(data.length < 20){
       return;
@@ -93,9 +92,9 @@ class Box2DTCPHandler{
   
   void send_velocities(RobotKinematicModel model, int idx){
     if(paused){
-      println("Setting velocities... VL: " + nf(model.left_velocity,0,3) + " VR: " + nf(model.right_velocity,0,3) + " idx: " + idx);
+      println("Setting velocities... linear: " + nf(model.linear_velocity,0,3) + " angular: " + nf(model.angular_velocity,0,3) + " idx: " + idx);
     }
-    c.write("a " + model.left_velocity + " " + model.right_velocity + " " + idx +"\n\0");
+    c.write("a " + model.linear_velocity + " " + model.angular_velocity + " " + idx +"\n\0");
     // Receive data from server
     while(c.available() == 0);
     input = c.readString();

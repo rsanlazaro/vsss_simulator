@@ -43,9 +43,9 @@ boolean displayC = false; // Variable to display the coordinates
 boolean coord    = true; // If true, it shows the values for x, y and angle
 int offset       = 120; // Value used to display the coordinates
 int rate         = 1; // The rate at which the coordinates are computed
-Vision robotClass1,robotClass2,robotClass3, robotClass4,robotClass5,robotClass6, ballClass; // Class for vision
+Vision robotClass1, robotClass2, robotClass3, robotClass4, robotClass5, robotClass6, ballClass; // Class for vision
 
-boolean paused = false;
+boolean paused = true;
 boolean frame_request = true;
 
 void setup() 
