@@ -47,8 +47,4 @@ class Robot{
     position._print();
     println("angle: " + angle);
   }
-  void printSpeed(int idx, float linear_speed_x, float linear_speed_y, float angular_speed){
-    println(idx + " " + "Vel: "+ linear_speed_x + " "+ linear_speed_y+ " " + angular_speed);
-    
-  }
 };

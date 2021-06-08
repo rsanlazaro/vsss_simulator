@@ -26,5 +26,4 @@ class RobotKinematicModel{
     println("Wheel radius: " + wheel_radius);
     println("Length between wheels: " + lenght_between_wheels);
   }
-  
 }

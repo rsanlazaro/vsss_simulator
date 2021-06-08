@@ -1,4 +1,3 @@
-
 import processing.net.*;
 
 //TCP communication with box2D server

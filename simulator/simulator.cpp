@@ -1,10 +1,12 @@
 
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 #include <cmath>
+#include <chrono>
 #define _USE_MATH_DEFINES
 
 using namespace std;
@@ -13,13 +15,17 @@ using namespace std;
 #include "field/field.hpp"
 #include "server/server.hpp"
 #include "robot/robot.hpp"
+#include "PID/PID.hpp"
+
 
 //Box2D
 #include "../box2d/include/box2d/box2d.h"
 
 
 void main(){
-
+    fstream file;
+    auto start = std::chrono::steady_clock::now();
+   // ofstream file("data.txt", ios::app);
     //Scale factors for box2d objects to fit between 0.1 and 10 m
     float scale_factor = 5;
 
@@ -109,17 +115,17 @@ void main(){
     vector <pair<float, float>> forces(number_of_robots);
 
     position[0].Set(-0.8f, 0.5f);
-    angle[0] = 0.f;
+    angle[0] = 0.0f;
     position[1].Set(0.8f, 0.5f);
-    angle[1] = 1.1f;
+    angle[1] = 0.0f;
     position[2].Set(-0.8f, -0.5f);
-    angle[2] = 1.2f;
+    angle[2] = 0.0f;
     position[3].Set(0.8f, -0.5f);
-    angle[3] = 1.57f;
+    angle[3] = 0.0f;
     position[4].Set(1.5f, 0.5f);
-    angle[4] = 1.4f;
+    angle[4] = 0.0f;
     position[5].Set(-1.5f, 0.5f);
-    angle[5] = 1.f;
+    angle[5] = 0.0f;
 
     for(int i = 0; i < robots.size(); ++i){
         robots[i] = Robot(position[i], angle[i], side_length, density, friction, restitution, 
@@ -171,10 +177,13 @@ void main(){
                     b2Body* robotBody = robots[i].get_body_ptr();
                     b2Vec2 position   = robotBody->GetPosition();
                     float angle       = robotBody->GetAngle();
-                    sprintf_s(aux,"%.2f %.2f %.2f ", position.x, position.y, angle);
+                    sprintf_s(aux, "%.2f %.2f %.2f ", position.x, position.y, angle);
                     strcat_s(msg, aux);
                 }
+                printf("\n");
                 strcat_s(msg, "\n");
+                
+          
                 //printf(msg);
                 server.send_message(msg);
                 //printf("Bytes sent: %d\n", server.get_send_result());
@@ -186,13 +195,24 @@ void main(){
                 for (int i = 0; i < robots.size(); ++i){
                     robotBody  = robots[i].get_body_ptr();
                     robotAngle = robotBody->GetAngle();
+                    b2Vec2 l_speed = robotBody->GetLinearVelocity();
+                    float w_speed = robotBody->GetAngularVelocity();
+
+                    float RPS_L = (2*(sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) - w_speed * 0.4f)  / (2 * 0.1f * 2 * M_PI);
+                    float RPS_R = (2 * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) + w_speed * 0.4f) / (2 * 0.1f * 2 * M_PI);
+                    float Desired_RPS_L = 0.0f;
+                    float Desired_RPS_R = 0.0f;
+                    PID control = PID();
+                    float Y_PID_L = control.PID_UD(Desired_RPS_L, RPS_L);
+                    float Y_PID_R = control.PID_UD(Desired_RPS_L, RPS_L);
+                    
                     motorAngle = robotAngle + (float)M_PI / 2.f;
 
                     b2Vec2 leftMotorPos  = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
                     b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
 
-                    b2Vec2 leftMotorForce (forces[i].first  * cos(motorAngle), forces[i].first  * sin(motorAngle));
-                    b2Vec2 rightMotorForce(forces[i].second * cos(motorAngle), forces[i].second * sin(motorAngle));
+                    b2Vec2 leftMotorForce (Y_PID_L  * cos(motorAngle), Y_PID_L * sin(motorAngle));
+                    b2Vec2 rightMotorForce(Y_PID_R * cos(motorAngle), Y_PID_R * sin(motorAngle));
 
                     robotBody->ApplyForce(leftMotorForce,  leftMotorPos,  true);
                     robotBody->ApplyForce(rightMotorForce, rightMotorPos, true);
@@ -273,14 +293,14 @@ void main(){
                 int idx;
                 printf("aux: %s\n", aux);
                 sscanf_s(aux, "%f %f %d", &force_m1, &force_m2, &idx);
-                //printf("\nForce 1: %.2f Force 2: %.2f idx: %d\n\n", force_m1, force_m2, idx);
+                printf("\nForce 1: %.2f Force 2: %.2f idx: %d\n\n", force_m1, force_m2, idx);
                 forces[idx] = {force_m1, force_m2};
-               // msg[0] = 'K';
-               // msg[1] = '\n';
-               // msg[2] = '\0';
-               // printf(msg);
-               // server.send_message(msg);
-               // printf("Bytes sent: %d\n", server.get_send_result());
+                msg[0] = 'K';
+                msg[1] = '\n';
+                msg[2] = '\0';
+                printf(msg);
+                server.send_message(msg);
+                printf("Bytes sent: %d\n", server.get_send_result());
             }
         }
         else if (server.get_send_result() == 0)
