@@ -78,6 +78,7 @@ void setup()
 void draw() 
 {
   if(!paused || frame_request){
+    println(int(frameRate));
     handler.request_world_state();
     //Draw state
     background(background_color);
@@ -100,7 +101,8 @@ void draw()
     }else{
       displayC = false;
     }
-    if (coord && displayC){
+    
+    if (paused){
       
       fill(255);
       textSize(12);
