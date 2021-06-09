@@ -23,20 +23,5 @@ void setup()
 void draw() 
 {
   
-  r1.set_vel_robot(10,-5); 
-  r2.set_vel_robot(-1,5);
-  r3.set_vel_robot(5,0);
-  delay(2000);
-   r1.set_vel_robot(-10,-5); 
-  r2.set_vel_robot(1,5);
-  r3.set_vel_robot(-5,0);
-  delay(2000);
-   r1.set_vel_robot(0,-5); 
-  r2.set_vel_robot(0,5);
-  r3.set_vel_robot(0,0);
-  delay(2000);
-   r1.set_vel_robot(0,5); 
-  r2.set_vel_robot(1,5);
-  r3.set_vel_robot(-5,0);
-  delay(2000);
+
 }

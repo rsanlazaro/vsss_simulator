@@ -147,7 +147,7 @@ void main(){
     */
     int32 velocityIterations = 12;
     int32 positionIterations = 10;
-
+    int sign = 1;
     char msg[DEFAULT_BUFLEN];
     char aux[DEFAULT_BUFLEN];
     Server server = Server();
@@ -201,32 +201,56 @@ void main(){
                     robotAngle = robotBody->GetAngle();
                     b2Vec2 l_speed = robotBody->GetLinearVelocity();
                     float w_speed = robotBody->GetAngularVelocity();
+
+
+                   // float Speed_Direction =
+
+                    motorAngle = robotAngle + (float)M_PI / 2.f;
+
+                    b2Vec2 leftMotorPos = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
+                    b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
+
+                    b2Vec2 VecSpeed_Local = robotBody->GetLocalVector(l_speed);
+
+                    
+                    if (VecSpeed_Local.y >= 0) {
+                         sign = 1;
+                    }
+                    else {
+                         sign = -1;
+                    }
                     
                     float Desired_RadPS_L = W_speed[i].first;
                     float Desired_RadPS_R = W_speed[i].second;
 
 
-                    cout << "\n \nRobot " << i << "   " << Desired_RadPS_L << "   " << Desired_RadPS_R << endl;
-                        float RadPS_L = (2 * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) - w_speed * 0.4f) / (2 * 0.1f );
-                        float RadPS_R = (2 * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) + w_speed * 0.4f) / (2 * 0.1f );
-                        /*cout << "\n\n";
-                        cout << "\n-------------Measured Values--------Robot " << i << endl;;
-                        cout << "Liner speed X = " << l_speed.x << "   Linear speed y = " << l_speed.y << " angular speed = " << w_speed << endl;
-                        cout << "Angular speed L = " << RadPS_L << endl;
-                        cout << "Angular speed R = " << RadPS_R <<"\n"<< endl;*/
-                        
-                        
-                      /*  cout << "\n-------------Sending PID references------------ \n";
-                        cout << "----Left wheel PID-----------------------------..\n";*/
-                        float Y_PID_L = control_L.PID_UD(Desired_RadPS_L, RadPS_L, i);
-                       // cout << "----Right wheel PID----------------------------..\n";
-                        float Y_PID_R = control_R.PID_UD(Desired_RadPS_R, RadPS_R, i);
-                        //cout << " \nRobot " << i << " PID_L = " << Y_PID_L << " PID_R = " << Y_PID_R << endl;
+                    //cout << "\n \nRobot " << i << "   " << Desired_RadPS_L << "   " << Desired_RadPS_R << endl;
 
-                        motorAngle = robotAngle + (float)M_PI / 2.f;
-                       
-                        b2Vec2 leftMotorPos = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
-                        b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
+
+                        float RadPS_L = (2 * sign * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) - w_speed * 0.4f) / (2 * 0.1f );
+                        float RadPS_R = (2 * sign * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) + w_speed * 0.4f) / (2 * 0.1f );
+
+
+
+                       //cout << "\n\n";
+                        cout << "\n-------------Measured Values--------Robot " << i << endl;;
+                        //cout << "Liner speed X = " << l_speed.x << "   Linear speed y = " << l_speed.y << " angular speed = " << w_speed << endl;
+                        //cout << "Angular speed L = " << RadPS_L << endl;
+                        //cout << "Angular speed R = " << RadPS_R <<"\n"<< endl;*/
+                        
+                        
+                        //cout << "\n-------------Sending PID references------------ \n";
+                        cout << "----Left wheel PID-----------------------------..\n";
+                        float Y_PID_L = control_L.PID_UD(Desired_RadPS_L, RadPS_L, i);
+                        cout << "----Right wheel PID----------------------------..\n";
+                        float Y_PID_R = control_R.PID_UD(Desired_RadPS_R, RadPS_R, i);
+                        cout  << " PID_L = " << Y_PID_L << " PID_R = " << Y_PID_R << endl;
+                        cout << "\n\n";
+                        
+
+
+
+                        //
 
                         b2Vec2 leftMotorForce(Y_PID_L * cos(motorAngle), Y_PID_L * sin(motorAngle));
                         b2Vec2 rightMotorForce(Y_PID_R * cos(motorAngle), Y_PID_R * sin(motorAngle));
