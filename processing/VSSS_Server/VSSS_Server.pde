@@ -14,7 +14,6 @@ float data[];
 
 //1 meter is equivalent to "meterToPixel" pixels
 float meterToPixel = 50.;
-
 Field field;
 Ball ball;
 Robot[] robots;
@@ -36,8 +35,8 @@ color midfield_color   = color(0, 255, 0);     //Green-ish
 color forward_color    = color(0, 0, 255);     //Blue-ish
 
 
-boolean paused = false;
-boolean frame_request = true;
+boolean paused =false;
+boolean frame_request = false;
 
 void setup() 
 {

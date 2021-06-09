@@ -1,18 +1,28 @@
 #ifndef PID_H
 #define PID_H
+#include <vector>
 
 class PID {
 	float Kp;
 	float Ki;
 	float Kd;
-	float uk_1;
-	float uk;
-	float yk_1;
 	float yk;
 	float tau;
+	float error;
 
+	float prev[6]={ 0,0,0,0,0,0 };
+	float yk_1[6] = { 0,0,0,0,0,0 };
+	float uk[6] = { 0,0,0,0,0,0 };
+	float uk_1[6] = { 0,0,0,0,0,0 };
+	float integr[6] = { 0,0,0,0,0,0 };
+	float differ[6] = { 0,0,0,0,0,0 };
+	float propor[6] = { 0,0,0,0,0,0 };
+	float prevMeasur[6] = { 0,0,0,0,0,0 };
 	float limMin;
 	float limMax;
+
+	
+
 
 	float T;
 	
@@ -24,7 +34,7 @@ class PID {
 	float out;
 	public:
 	PID();
-	float PID_UD(float setpoint, float measurement);
+	float PID_UD(float setpoint, float measurement, int index);
 
 };
 

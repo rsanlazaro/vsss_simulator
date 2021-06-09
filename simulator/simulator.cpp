@@ -26,7 +26,9 @@ void main(){
    // PID();
     fstream file;
     auto start = std::chrono::steady_clock::now();
-    PID control = PID();
+    PID control_L = PID();
+    PID control_R = PID();
+
    // ofstream file("data.txt", ios::app);
     //Scale factors for box2d objects to fit between 0.1 and 10 m
     float scale_factor = 5;
@@ -114,7 +116,7 @@ void main(){
     vector <b2Vec2> position(number_of_robots);
     vector <float>  angle(number_of_robots);
     vector <Robot>  robots(number_of_robots);
-    vector <pair<float, float>> forces(number_of_robots);
+    vector <pair<float, float>> W_speed(number_of_robots);
 
     position[0].Set(-0.8f, 0.5f);
     angle[0] = 0.0f;
@@ -180,7 +182,6 @@ void main(){
                     b2Vec2 position   = robotBody->GetPosition();
                     float angle       = robotBody->GetAngle();
                     sprintf_s(aux, "%.2f %.2f %.2f ", position.x, position.y, angle);
-                    cout << position.x << "\t" << position.y << "\n";
                     strcat_s(msg, aux);
                 }
                 printf("\n");
@@ -200,26 +201,39 @@ void main(){
                     robotAngle = robotBody->GetAngle();
                     b2Vec2 l_speed = robotBody->GetLinearVelocity();
                     float w_speed = robotBody->GetAngularVelocity();
-
-                    float RPS_L = (2*(sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) - w_speed * 0.4f)  / (2 * 0.1f * 2 * M_PI);
-                    float RPS_R = (2 * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) + w_speed * 0.4f) / (2 * 0.1f * 2 * M_PI);
-                    float Desired_RPS_L = -2.0f;
-                    float Desired_RPS_R = 2.0f;
                     
-                    float Y_PID_L = control.PID_UD(Desired_RPS_L, RPS_L);
-                    float Y_PID_R = control.PID_UD(Desired_RPS_R, RPS_R);
-                    cout <<"pid  L = "<<Y_PID_L << "     pid  R = " << Y_PID_R << "\n";
+                    float Desired_RadPS_L = W_speed[i].first;
+                    float Desired_RadPS_R = W_speed[i].second;
+
+
+                    cout << "\n \nRobot " << i << "   " << Desired_RadPS_L << "   " << Desired_RadPS_R << endl;
+                        float RadPS_L = (2 * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) - w_speed * 0.4f) / (2 * 0.1f );
+                        float RadPS_R = (2 * (sqrt(pow(l_speed.x, 2) + pow(l_speed.y, 2))) + w_speed * 0.4f) / (2 * 0.1f );
+                        /*cout << "\n\n";
+                        cout << "\n-------------Measured Values--------Robot " << i << endl;;
+                        cout << "Liner speed X = " << l_speed.x << "   Linear speed y = " << l_speed.y << " angular speed = " << w_speed << endl;
+                        cout << "Angular speed L = " << RadPS_L << endl;
+                        cout << "Angular speed R = " << RadPS_R <<"\n"<< endl;*/
+                        
+                        
+                      /*  cout << "\n-------------Sending PID references------------ \n";
+                        cout << "----Left wheel PID-----------------------------..\n";*/
+                        float Y_PID_L = control_L.PID_UD(Desired_RadPS_L, RadPS_L, i);
+                       // cout << "----Right wheel PID----------------------------..\n";
+                        float Y_PID_R = control_R.PID_UD(Desired_RadPS_R, RadPS_R, i);
+                        //cout << " \nRobot " << i << " PID_L = " << Y_PID_L << " PID_R = " << Y_PID_R << endl;
+
+                        motorAngle = robotAngle + (float)M_PI / 2.f;
+                       
+                        b2Vec2 leftMotorPos = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
+                        b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
+
+                        b2Vec2 leftMotorForce(Y_PID_L * cos(motorAngle), Y_PID_L * sin(motorAngle));
+                        b2Vec2 rightMotorForce(Y_PID_R * cos(motorAngle), Y_PID_R * sin(motorAngle));
+                        
+                        robotBody->ApplyForce(leftMotorForce, leftMotorPos, true);
+                        robotBody->ApplyForce(rightMotorForce, rightMotorPos, true);
                     
-                    motorAngle = robotAngle + (float)M_PI / 2.f;
-
-                    b2Vec2 leftMotorPos  = robotBody->GetWorldPoint(robots[i].get_left_motor_position());  //Get left  motor's position in world coord
-                    b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
-
-                    b2Vec2 leftMotorForce (Y_PID_L  * cos(motorAngle), Y_PID_L * sin(motorAngle));
-                    b2Vec2 rightMotorForce(Y_PID_R * cos(motorAngle), Y_PID_R * sin(motorAngle));
-
-                    robotBody->ApplyForce(leftMotorForce,  leftMotorPos,  true);
-                    robotBody->ApplyForce(rightMotorForce, rightMotorPos, true);
                 }
 
                 //Simulate 1 step
@@ -290,15 +304,15 @@ void main(){
 
             } else if (data[0] == 'a') {
                 printf("\n");
-                printf("Recieving forces definition...\n");
+                printf("Recieving angular speed definition...\n");
                 memcpy(aux, &data[2], strlen(data)-2);
-                float force_m1;
-                float force_m2;
+                float w_m1;
+                float w_m2;
                 int idx;
                 printf("aux: %s\n", aux);
-                sscanf_s(aux, "%f %f %d", &force_m1, &force_m2, &idx);
-                printf("\nForce 1: %.2f Force 2: %.2f idx: %d\n\n", force_m1, force_m2, idx);
-                forces[idx] = {force_m1, force_m2};
+                sscanf_s(aux, "%f %f %d", &w_m1, &w_m2, &idx);
+                printf("\nForce 1: %.2f Force 2: %.2f idx: %d\n\n", w_m1, w_m2, idx);
+                W_speed[idx] = {w_m1, w_m2};
                 msg[0] = 'K';
                 msg[1] = '\n';
                 msg[2] = '\0';
