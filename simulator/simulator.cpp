@@ -211,7 +211,6 @@ void main(){
                     b2Vec2 rightMotorPos = robotBody->GetWorldPoint(robots[i].get_right_motor_position()); //Get right motor's position in world coord
 
                     b2Vec2 VecSpeed_Local = robotBody->GetLocalVector(l_speed);
-
                     
                     if (VecSpeed_Local.y >= 0) {
                          sign = 1;

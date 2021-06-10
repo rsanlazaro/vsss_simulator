@@ -19,9 +19,9 @@ void setup()
   r2 = new Robot_control(1);
   r3 = new Robot_control(2);
 
-  r1.set_vel_robot(10.0,0.0);  //Velocidad angular a enviar
-  r2.set_vel_robot(14.5,0.0);
-  r3.set_vel_robot(5.0,0.0);
+  r1.set_vel_robot(4.0,-3.0);  //Velocidad angular a enviar
+  r2.set_vel_robot(-10.0,2.0);
+  r3.set_vel_robot(10.0,8.0);
 
 }
 

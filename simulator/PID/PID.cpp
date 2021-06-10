@@ -14,7 +14,7 @@ PID::PID() {
 	
 	Ki = 114.7202f;
 	Kd = 0.0f;
-	Kp = 6.3329f;
+	Kp = 8.3329f;
 	out = 0.0f;
 }	
 
@@ -27,22 +27,12 @@ float PID::PID_UD(float setpoint, float measurement, int i) { //Set point y meas
 	integr[i] = integr[i] + 0.5f * Ki * 0.0166f * (error + prev[i]);
 	
 	//cout << "integrator = " << integr[i] << " Ki = " << Ki << endl;
-	/*if (limMax > proportional) {
-		limMaxInt = limMax - proportional;
-	}else{
-		limMaxInt = 0.0f;
+
+	if (integr[i] > 150) {
+		integr[i] = 150;
 	}
-	if (limMin < proportional) {
-		limMinInt = limMin - proportional;
-	}
-	else {
-		limMinInt = 0.0f;
-	}*/
-	if (integr[i] > 80) {
-		integr[i] = 80;
-	}
-	else if (integr[i] < -80) {
-		integr[i] = -80;
+	else if (integr[i] < -150) {
+		integr[i] = -150;
 	}
 
 	differ[i] = (2.0f * Kd * (measurement - prevMeasur[i])
@@ -51,11 +41,11 @@ float PID::PID_UD(float setpoint, float measurement, int i) { //Set point y meas
 	//cout << "Differentiator = " << differ[i] << "  Kd = "<< Kd<< endl;
 		out = propor[i] + integr[i] + differ[i];
 		
-		if (out > 50.0f) {
-			out = 50.0f;
+		if (out > 120.0f) {
+			out = 120.0f;
 		}
-		else if (out < -50.0f) {
-			out = -50.0f;
+		else if (out < -120.0f) {
+			out = -120.0f;
 		}
 	//	cout << "PID out = " << out << endl;
 		prev[i] = error;
