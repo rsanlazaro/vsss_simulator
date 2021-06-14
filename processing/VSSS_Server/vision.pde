@@ -114,8 +114,108 @@ class Vision
     }
 
 
+    //void findCircles(PImage imgG, boolean zona)
+    //{
+    //    PShape tempShape;
+    //    ArrayList<Contour> contours;
+    //    int count=0;
+    //    PVector tempVe=null;
+    //    PVector[] centroidsArray=new PVector[6];
+    //    PShape[] shapesArray = new PShape[6];
+    //    PVector[] vertex3 = new PVector[3];
+    //    this.opencvC.loadImage(imgG);
+    //    this.opencvC.erode();
+    //    contours = this.opencvC.findContours();
+    //    for (Contour contour : contours)
+    //    {
+    //    tempShape = createShape();
+    //    tempShape.beginShape();
+    //    for (PVector point : contour.getPolygonApproximation().getPoints())
+    //    {
+    //        tempShape.vertex(point.x, point.y);
+    //    }
+    //    tempShape.endShape(CLOSE);
+    //    if (count<6){
+    //    shapesArray[count]=tempShape;
+    //    centroidsArray[count] = computeCentroid(shapesArray[count]);
+    //    count=count+1; 
+    //    }
+    //    //println(count);
+    //    }
+    //    if (count == 6)
+    //    {
+    //    int cta=0;
+    //    for (int k=0;k<5;k++)
+    //    {
+    //        for (int m=k+1;m<6;m++)
+    //        {
+    //            if (compareShapes(centroidsArray[k],centroidsArray[m])==true)
+    //            {
+    //            vertex3[cta] = centroidsArray[k];
+    //            cta=cta+1;
+    //            }
+    //        }
+    //    }
+    //    // Is the common vertex 1?
+    //    PVector  u = new PVector(vertex3[0].x,vertex3[0].y);
+    //    u.sub(vertex3[1]);
+    //    PVector  v = new PVector(vertex3[2].x,vertex3[2].y);
+    //    v.sub(vertex3[1]);
+    //    float pp = u.dot(v)/(u.mag()*v.mag());
+    //    // A right angle is considered between 85 deg (1.48 rad) and 95 deg (1.65 rad)
+    //    if ((pp<cos(1.48))&&(pp>cos(1.65)))  
+    //    {
+    //        u = PVector.sub(vertex3[0],vertex3[2]);
+    //        u.mult(0.5);
+    //        u.add(vertex3[2]);
+    //        tempVe = u;
+    //        this.angle=PVector.sub(vertex3[1],u).heading()*180/PI;       
+    //    }
+    //    else
+    //    {
+    //        // Is the common vertex 2?
+    //        u = new PVector(vertex3[1].x,vertex3[1].y);
+    //        u.sub(vertex3[2]);
+    //        v = new PVector(vertex3[0].x,vertex3[0].y);
+    //        v.sub(vertex3[2]);
+    //        pp = u.dot(v)/(u.mag()*v.mag());
+    //        // A right angle is considered between 80 and 90 deg (80 deg = 1.4 rad)
+    //        if ((pp<cos(1.48))&&(pp>cos(1.65)))  // If the right angle is between 1 and 2
+    //        {
+    //        u = PVector.sub(vertex3[1],vertex3[0]);
+    //        u.mult(0.5);
+    //        u.add(vertex3[0]);
+    //        tempVe = u;
+    //        this.angle=PVector.sub(vertex3[2],u).heading()*180/PI;
+    //        }      
+    //        else
+    //        {
+    //        // The common vertex is 0
+    //        u = PVector.sub(vertex3[1],vertex3[2]);
+    //        u.mult(0.5);
+    //        u.add(vertex3[2]);
+    //        tempVe = u; 
+    //        this.angle=PVector.sub(vertex3[0],u).heading()*180/PI;
+    //        }
+    //    }
+    //    this.angle=180 - this.angle-45; 
+    //    if (this.angle<0){
+    //        this.angle = this.angle+360;
+    //    }
+    //    if (zona == true)
+    //    {
+    //        this.centroidG.x = this.centroidG.x-(2*DOISize)+tempVe.x;
+    //        this.centroidG.y = this.centroidG.y-(2*DOISize)+tempVe.y;
+    //    }
+    //    else
+    //    {
+    //        this.centroidG = tempVe;
+    //    }
+    //    }
+    //}
+    
     void findCircles(PImage imgG, boolean zona)
-    {
+{
         PShape tempShape;
         ArrayList<Contour> contours;
         int count=0;
@@ -144,75 +244,80 @@ class Vision
         }
         if (count == 6)
         {
-        int cta=0;
-        for (int k=0;k<5;k++)
-        {
-            for (int m=k+1;m<6;m++)
-            {
-                if (compareShapes(centroidsArray[k],centroidsArray[m])==true)
-                {
-                vertex3[cta] = centroidsArray[k];
-                cta=cta+1;
-                }
-            }
-        }
-        // Is the common vertex 1?
-        PVector  u = new PVector(vertex3[0].x,vertex3[0].y);
-        u.sub(vertex3[1]);
-        PVector  v = new PVector(vertex3[2].x,vertex3[2].y);
-        v.sub(vertex3[1]);
-        float pp = u.dot(v)/(u.mag()*v.mag());
-        // A right angle is considered between 85 deg (1.48 rad) and 95 deg (1.65 rad)
-        if ((pp<cos(1.48))&&(pp>cos(1.65)))  
-        {
-            u = PVector.sub(vertex3[0],vertex3[2]);
-            u.mult(0.5);
-            u.add(vertex3[2]);
-            tempVe = u;
-            this.angle=PVector.sub(vertex3[1],u).heading()*180/PI;       
-        }
-        else
-        {
-            // Is the common vertex 2?
-            u = new PVector(vertex3[1].x,vertex3[1].y);
-            u.sub(vertex3[2]);
-            v = new PVector(vertex3[0].x,vertex3[0].y);
-            v.sub(vertex3[2]);
-            pp = u.dot(v)/(u.mag()*v.mag());
-            // A right angle is considered between 80 and 90 deg (80 deg = 1.4 rad)
-            if ((pp<cos(1.48))&&(pp>cos(1.65)))  // If the right angle is between 1 and 2
-            {
-            u = PVector.sub(vertex3[1],vertex3[0]);
-            u.mult(0.5);
-            u.add(vertex3[0]);
-            tempVe = u;
-            this.angle=PVector.sub(vertex3[2],u).heading()*180/PI;
-            }      
-            else
-            {
-            // The common vertex is 0
-            u = PVector.sub(vertex3[1],vertex3[2]);
-            u.mult(0.5);
-            u.add(vertex3[2]);
-            tempVe = u; 
-            this.angle=PVector.sub(vertex3[0],u).heading()*180/PI;
-            }
-        }
-        this.angle=180 - this.angle-45; 
-        if (this.angle<0){
-            this.angle = this.angle+360;
-        }
-        if (zona == true)
-        {
-            this.centroidG.x = this.centroidG.x-(2*DOISize)+tempVe.x;
-            this.centroidG.y = this.centroidG.y-(2*DOISize)+tempVe.y;
-        }
-        else
-        {
-            this.centroidG = tempVe;
-        }
+          int cta=0;
+          for (int k=0;k<5;k++)
+          {
+              for (int m=k+1;m<6;m++)
+              {
+                  if (compareShapes(centroidsArray[k],centroidsArray[m])==true)
+                  {
+                    vertex3[cta] = centroidsArray[k];
+                    cta=cta+1;
+                  }
+              }
+          }
+          if (cta==3)
+          {
+          // Is the common vertex 1?
+          PVector  u = new PVector(vertex3[0].x,vertex3[0].y);
+          u.sub(vertex3[1]);
+          PVector  v = new PVector(vertex3[2].x,vertex3[2].y);
+          v.sub(vertex3[1]);
+          float pp = u.dot(v)/(u.mag()*v.mag());
+          // A right angle is considered between 85 deg (1.48 rad) and 95 deg (1.65 rad)
+          if ((pp<cos(1.48))&&(pp>cos(1.65)))  
+          {
+              u = PVector.sub(vertex3[0],vertex3[2]);
+              u.mult(0.5);
+              u.add(vertex3[2]);
+              tempVe = u;
+              this.angle=PVector.sub(vertex3[1],u).heading()*180/PI;       
+          }
+          else
+          {
+              // Is the common vertex 2?
+              u = new PVector(vertex3[1].x,vertex3[1].y);
+              u.sub(vertex3[2]);
+              v = new PVector(vertex3[0].x,vertex3[0].y);
+              v.sub(vertex3[2]);
+              pp = u.dot(v)/(u.mag()*v.mag());
+              // A right angle is considered between 80 and 90 deg (80 deg = 1.4 rad)
+              if ((pp<cos(1.48))&&(pp>cos(1.65)))  // If the right angle is between 1 and 2
+              {
+                u = PVector.sub(vertex3[1],vertex3[0]);
+                u.mult(0.5);
+                u.add(vertex3[0]);
+                tempVe = u;
+                this.angle=PVector.sub(vertex3[2],u).heading()*180/PI;
+              }      
+              else
+              {
+                // The common vertex is 0
+                u = PVector.sub(vertex3[1],vertex3[2]);
+                u.mult(0.5);
+                u.add(vertex3[2]);
+                tempVe = u; 
+                this.angle=PVector.sub(vertex3[0],u).heading()*180/PI;
+              }
+          }
+          this.angle=180 - this.angle-45+360; 
+          this.angle = this.angle%360;
+          //if (this.angle<0)
+          //{
+          //    this.angle = this.angle+360;
+          //}
+          if (zona == true)
+          {
+              this.centroidG.x = this.centroidG.x-(2*DOISize)+tempVe.x;
+              this.centroidG.y = this.centroidG.y-(2*DOISize)+tempVe.y;
+          }
+          else
+          {
+              this.centroidG = tempVe;
+          }
         }
     }
+}
 
     void findBall(PImage pImg, boolean zona)
     {
@@ -313,5 +418,4 @@ class Vision
             return(false);
         }
     }
-  
 }

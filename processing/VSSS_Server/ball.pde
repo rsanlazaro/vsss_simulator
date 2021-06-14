@@ -11,7 +11,7 @@ class Ball{
     this.position = position;
   }
   void _print(){
-    print("position: ");
+    //print("position: ");
     position._print();
   }
   void _draw(){

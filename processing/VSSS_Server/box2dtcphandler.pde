@@ -21,8 +21,8 @@ class Box2DTCPHandler{
     data = float(split(input, ' '));
     field = new Field(data, box2dtransform);
     if(paused){
-      println("Requesting field description...");
-      println(input);
+      //println("Requesting field description...");
+      //println(input);
     }
   }
   
@@ -35,9 +35,9 @@ class Box2DTCPHandler{
     data = float(split(input, ' '));
     ball = new Ball(box2dtransform.transform_scalar(data[0]), ball_color);
     if(paused){
-      println("Requesting ball description...");
-      println(input);
-      println("Radius: " + ball.radius);
+      //println("Requesting ball description...");
+      //println(input);
+      //println("Radius: " + ball.radius);
     }
   }
   
@@ -58,9 +58,9 @@ class Box2DTCPHandler{
       robots[i] = new Robot(side_length, robot_teams[i], robot_roles[i]);
     }
     if(paused){
-      println("Requesting robot description...");
-      println(input);
-      println("Side length: " + side_length);
+      //println("Requesting robot description...");
+      //println(input);
+      //println("Side length: " + side_length);
       model._print();
     }
   }
@@ -71,6 +71,7 @@ class Box2DTCPHandler{
     while(c.available() == 0);
     input = c.readString();
     input = input.substring(0, input.indexOf("\n"));
+    //println(input);
     data = float(split(input, ' '));
     if(data.length < 20){
       return;
@@ -81,8 +82,8 @@ class Box2DTCPHandler{
       robots[i].set_angle(data[i*3+4]);
     }
     if(paused){
-      println("Requesting world state...");
-      println(input);
+      //println("Requesting world state...");
+      //println(input);
       ball._print();
       for(int i = 0; i < robots.length; ++i){
         robots[i]._print();
@@ -92,9 +93,9 @@ class Box2DTCPHandler{
   
   void send_velocities(RobotKinematicModel model, int idx){
     if(paused){
-      println("Setting velocities... linear: " + nf(model.linear_velocity,0,3) + " angular: " + nf(model.angular_velocity,0,3) + " idx: " + idx);
+      //println("Setting velocities... VL: " + nf(model.left_velocity,0,3) + " VR: " + nf(model.right_velocity,0,3) + " idx: " + idx);
     }
-    c.write("a " + model.linear_velocity + " " + model.angular_velocity + " " + idx +"\n\0");
+    c.write("a " + model.left_velocity + " " + model.right_velocity + " " + idx +"\n\0");
     // Receive data from server
     while(c.available() == 0);
     input = c.readString();
