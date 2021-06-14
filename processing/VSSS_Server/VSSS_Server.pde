@@ -1,4 +1,3 @@
-
 import processing.net.*;
 import gab.opencv.*;
 import org.opencv.imgproc.Imgproc;
@@ -43,10 +42,9 @@ boolean displayC = false; // Variable to display the coordinates
 boolean coord    = true; // If true, it shows the values for x, y and angle
 int offset       = 120; // Value used to display the coordinates
 int rate         = 1; // The rate at which the coordinates are computed
-Vision[] robotsVision;
-Vision   ballVision;
+Vision robotClass1,robotClass2,robotClass3, robotClass4,robotClass5,robotClass6, ballClass; // Class for vision
 
-boolean paused = true;
+boolean paused = false;
 boolean frame_request = true;
 
 void setup() 
@@ -65,19 +63,21 @@ void setup()
   //Robot description
   handler.request_robot_description();
   //Thread that handles the communication with clients
-  thread("ClientsTCP");
+  s = new Server(this, 12345); // Start a simple server on a port
   // Computer Vision
-  robotsVision = new Vision[robots.length];
-  for(int i = 0; i < robotsVision.length; ++i){
-    robotsVision[i] = new Vision(this, robots[i].team_color, robots[i].role_color);
-  }
-  ballVision = new Vision(this, ball_color);
+  robotClass1 = new Vision(this, team_1_color, goalkeeper_color);
+  robotClass2 = new Vision(this, team_1_color, midfield_color);
+  robotClass3 = new Vision(this, team_1_color, striker_color);
+  robotClass4 = new Vision(this, team_2_color, goalkeeper_color);
+  robotClass5 = new Vision(this, team_2_color, midfield_color);
+  robotClass6 = new Vision(this, team_2_color, striker_color);
+  ballClass   = new Vision(this, ball_color);
 }
 
 void draw() 
 {
+  thread("ClientsTCP");
   if(!paused || frame_request){
-    println(int(frameRate));
     handler.request_world_state();
     //Draw state
     background(background_color);
@@ -88,40 +88,85 @@ void draw()
     }
 
     if (!startC || frameCount%rate == 0){
-      for(int i = 0; i < robotsVision.length; ++i){
-        robotsVision[i].update(1);
-      }
-      ballVision.update(2);
+      robotClass1.update(1);
+      robotClass2.update(1);
+      robotClass3.update(1);
+      robotClass4.update(1);
+      robotClass5.update(1);
+      robotClass6.update(1);
+      ballClass.update(2);
       startC = true;
       displayC = true;
     }else{
       displayC = false;
     }
-    
-    if (paused){
+    if (coord && displayC){
       
       fill(255);
       textSize(12);
       strokeWeight(3);
       stroke(255,0,0);
       
-      for(int i = 0; i < robotsVision.length; ++i){
-        offset = 60;
-        if(robotsVision[i].centroidG.x>width/2){
-          offset = -120;
-        }
-        text("x: " + nf(robotsVision[i].centroidG.x,0,2),robotsVision[i].centroidG.x+offset,robotsVision[i].centroidG.y);
-        text("y: " + nf(robotsVision[i].centroidG.y,0,2),robotsVision[i].centroidG.x+offset,robotsVision[i].centroidG.y+15);
-        text("a: " + nf(robotsVision[i].angle,0,2),robotsVision[i].centroidG.x+offset,robotsVision[i].centroidG.y+30);
-        line(robotsVision[i].centroidG.x,robotsVision[i].centroidG.y,robotsVision[i].centroidG.x+(cos(radians(robotsVision[i].angle))*35),robotsVision[i].centroidG.y-(sin(radians(robotsVision[i].angle))*35));
+      offset = 60;
+      if(robotClass1.centroidG.x>width/2){
+        offset = -120;
       }
+      text("x: " + nf(robotClass1.centroidG.x,0,2),robotClass1.centroidG.x+offset,robotClass1.centroidG.y);
+      text("y: " + nf(robotClass1.centroidG.y,0,2),robotClass1.centroidG.x+offset,robotClass1.centroidG.y+15);
+      text("a: " + nf(robotClass1.angle,0,2),robotClass1.centroidG.x+offset,robotClass1.centroidG.y+30);
+      line(robotClass1.centroidG.x,robotClass1.centroidG.y,robotClass1.centroidG.x+(cos(radians(robotClass1.angle))*35),robotClass1.centroidG.y-(sin(radians(robotClass1.angle))*35));
+      
+      offset = 60;
+      if(robotClass2.centroidG.x>width/2){
+        offset = -120;
+      }
+      text("x: " + nf(robotClass2.centroidG.x,0,2),robotClass2.centroidG.x+offset,robotClass2.centroidG.y);
+      text("y: " + nf(robotClass2.centroidG.y,0,2),robotClass2.centroidG.x+offset,robotClass2.centroidG.y+15);
+      text("a: " + nf(robotClass2.angle,0,2),robotClass2.centroidG.x+offset,robotClass2.centroidG.y+30);
+      line(robotClass2.centroidG.x,robotClass2.centroidG.y,robotClass2.centroidG.x+(cos(radians(robotClass2.angle))*35),robotClass2.centroidG.y-(sin(radians(robotClass2.angle))*35));
+      
+      offset = 60;
+      if(robotClass3.centroidG.x>width/2){
+        offset = -120;
+      }
+      text("x: " + nf(robotClass3.centroidG.x,0,2),robotClass3.centroidG.x+offset,robotClass3.centroidG.y);
+      text("y: " + nf(robotClass3.centroidG.y,0,2),robotClass3.centroidG.x+offset,robotClass3.centroidG.y+15);
+      text("a: " + nf(robotClass3.angle,0,2),robotClass3.centroidG.x+offset,robotClass3.centroidG.y+30);
+      line(robotClass3.centroidG.x,robotClass3.centroidG.y,robotClass3.centroidG.x+(cos(radians(robotClass3.angle))*35),robotClass3.centroidG.y-(sin(radians(robotClass3.angle))*35));
+      
+      offset = 60;
+      if(robotClass4.centroidG.x>width/2){
+        offset = -120;
+      }        
+      text("x: " + nf(robotClass4.centroidG.x,0,2),robotClass4.centroidG.x+offset,robotClass4.centroidG.y);
+      text("y: " + nf(robotClass4.centroidG.y,0,2),robotClass4.centroidG.x+offset,robotClass4.centroidG.y+15);
+      text("a: " + nf(robotClass4.angle,0,2),robotClass4.centroidG.x+offset,robotClass4.centroidG.y+30);
+      line(robotClass4.centroidG.x,robotClass4.centroidG.y,robotClass4.centroidG.x+(cos(radians(robotClass4.angle))*35),robotClass4.centroidG.y-(sin(radians(robotClass4.angle))*35));
+      
+      offset = 60;
+      if(robotClass5.centroidG.x>width/2){
+        offset = -120;
+      }
+      text("x: " + nf(robotClass5.centroidG.x,0,2),robotClass5.centroidG.x+offset,robotClass5.centroidG.y);
+      text("y: " + nf(robotClass5.centroidG.y,0,2),robotClass5.centroidG.x+offset,robotClass5.centroidG.y+15);
+      text("a: " + nf(robotClass5.angle,0,2),robotClass5.centroidG.x+offset,robotClass5.centroidG.y+30);
+      line(robotClass5.centroidG.x,robotClass5.centroidG.y,robotClass5.centroidG.x+(cos(radians(robotClass5.angle))*35),robotClass5.centroidG.y-(sin(radians(robotClass5.angle))*35));
+      
+      offset = 60;
+      if(robotClass6.centroidG.x>width/2){
+        offset = -120;
+      }
+      text("x: " + nf(robotClass6.centroidG.x,0,2),robotClass6.centroidG.x+offset,robotClass6.centroidG.y);
+      text("y: " + nf(robotClass6.centroidG.y,0,2),robotClass6.centroidG.x+offset,robotClass6.centroidG.y+15);
+      text("a: " + nf(robotClass6.angle,0,2),robotClass6.centroidG.x+offset,robotClass6.centroidG.y+30);
+      line(robotClass6.centroidG.x,robotClass6.centroidG.y,robotClass6.centroidG.x+(cos(radians(robotClass6.angle))*35),robotClass6.centroidG.y-(sin(radians(robotClass6.angle))*35));
       
       offset = 30;
-      if(ballVision.centroidG.x>width/2){
+      if(ballClass.centroidG.x>width/2){
         offset = -90;
       }
-      text("x: " + nf(ballVision.centroidG.x,0,2),ballVision.centroidG.x+offset,ballVision.centroidG.y);
-      text("y: " + nf(ballVision.centroidG.y,0,2),ballVision.centroidG.x+offset,ballVision.centroidG.y+15);
+      text("x: " + nf(ballClass.centroidG.x,0,2),ballClass.centroidG.x+offset,ballClass.centroidG.y);
+      text("y: " + nf(ballClass.centroidG.y,0,2),ballClass.centroidG.x+offset,ballClass.centroidG.y+15);
     }
 
 
@@ -139,31 +184,35 @@ void keyPressed(){
 }
 
 void ClientsTCP(){
-  s = new Server(this, 12345); // Start a simple server on a port
   
-  //Recieve data from clients
   while(true){
+    //Recieve data from clients
     c1 = s.available();
     if (c1 != null) {
       println("Recieving data from client");
       input = c1.readString();
-      println(input);
-      commands = split(input, '\n');
-      for(int i = 0; i < commands.length; ++i){
-        data = float(split(commands[i], ' '));
-        if(data.length < 3){
-          break;
+      c1.clear();
+      println("Data from Python: " + input);
+      if (input != null){
+        commands = split(input, '\n');
+        for(int i = 0; i < commands.length; ++i){
+          data = float(split(commands[i], ' '));
+          if(data.length < 3){
+            break;
+          }
+          println(commands[i]);
+          println(data);
+          int id = int(data[0]);
+          model.setSpeed(data[1], data[2]);
+          handler.send_velocities(model, id);
+          println("Robot: " + id);
+          println("Left  velocity: " + model.left_velocity);
+          println("Right velocity: " + model.right_velocity);
         }
-        println(commands[i]);
-        println(data);
-        int id = int(data[0]);
-        model.setSpeed(data[1], data[2]);
-        handler.send_velocities(model, id);
-        println("Robot: " + id);
-        println("Left  velocity: " + model.left_velocity);
-        println("Right velocity: " + model.right_velocity);
       }
     }
+    //Send data to clients
+    s.write("s" + " " + nf(ballClass.centroidG.x,0,2) + " " + nf(ballClass.centroidG.y,0,2) + " " + nf(robotClass1.centroidG.x,0,2) + " " + nf(robotClass1.centroidG.y,0,2) + " " + nf(robotClass1.angle,0,2) + " " + nf(robotClass2.centroidG.x,0,2) + " " + nf(robotClass2.centroidG.y,0,2) + " " + nf(robotClass2.angle,0,2) + " " + nf(robotClass3.centroidG.x,0,2) + " " + nf(robotClass3.centroidG.y,0,2) + " " + nf(robotClass3.angle,0,2) + " " + nf(robotClass4.centroidG.x,0,2) + " " + nf(robotClass4.centroidG.y,0,2) + " " + nf(robotClass4.angle,0,2) + " " + nf(robotClass5.centroidG.x,0,2) + " " + nf(robotClass5.centroidG.y,0,2) + " " + nf(robotClass5.angle,0,2) + " " + nf(robotClass6.centroidG.x,0,2) + " " + nf(robotClass6.centroidG.y,0,2) + " " + nf(robotClass6.angle,0,2) + "\n\0" + " ");
     delay(5);
   }
 }

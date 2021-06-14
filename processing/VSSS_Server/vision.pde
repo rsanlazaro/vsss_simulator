@@ -140,7 +140,7 @@ class Vision
         centroidsArray[count] = computeCentroid(shapesArray[count]);
         count=count+1; 
         }
-        //println(count);
+        println(count);
         }
         if (count == 6)
         {
