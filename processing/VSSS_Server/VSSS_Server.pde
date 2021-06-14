@@ -53,6 +53,8 @@ void setup()
 {
   size(1500, 1000);
   background(background_color);
+  surface.setTitle("Server");
+  surface.setLocation(0, 0);
   stroke(255);
   frameRate(60);
   

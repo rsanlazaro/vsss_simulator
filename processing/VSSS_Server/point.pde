@@ -8,7 +8,7 @@ class Point{
     this.y = y;
   }
   void _print(){
-    println("x: " + x + " y: " + y);
+    //println("x: " + x + " y: " + y);
   }
   void _draw(){
     fill(255,0,255);

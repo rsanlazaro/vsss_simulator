@@ -23,7 +23,7 @@ class RobotKinematicModel{
     this.right_velocity = right_velocity;
   }
   void _print(){
-    println("Wheel radius: " + wheel_radius);
-    println("Length between wheels: " + lenght_between_wheels);
+    //println("Wheel radius: " + wheel_radius);
+    //println("Length between wheels: " + lenght_between_wheels);
   }
 }

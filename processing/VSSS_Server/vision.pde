@@ -235,11 +235,11 @@ class Vision
             tempShape.vertex(point.x, point.y);
         }
         tempShape.endShape(CLOSE);
-        //if (count<6){
+        if (count<6){
         shapesArray[count]=tempShape;
         centroidsArray[count] = computeCentroid(shapesArray[count]);
         count=count+1; 
-        //}
+        }
         //println(count);
         }
         if (count == 6)
