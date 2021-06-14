@@ -1,3 +1,5 @@
+// FINAL VERSION
+
 import processing.net.*;
 import gab.opencv.*;
 import org.opencv.imgproc.Imgproc;
@@ -63,7 +65,7 @@ void setup()
   //Robot description
   handler.request_robot_description();
   //Thread that handles the communication with clients
-  s = new Server(this, 12345); // Start a simple server on a port
+  s = new Server(this, 12345); // Start a simple server on a port    ////////////////////////////////////////////
   // Computer Vision
   robotClass1 = new Vision(this, team_1_color, goalkeeper_color);
   robotClass2 = new Vision(this, team_1_color, midfield_color);
@@ -76,7 +78,7 @@ void setup()
 
 void draw() 
 {
-  thread("ClientsTCP");
+  //thread("ClientsTCP");  ////////////////////////////////////////////////////////////////////////////////////////
   if(!paused || frame_request){
     handler.request_world_state();
     //Draw state
@@ -100,6 +102,7 @@ void draw()
     }else{
       displayC = false;
     }
+    println(nf(robotClass1.angle,0,2));
     if (coord && displayC){
       
       fill(255);
@@ -171,6 +174,7 @@ void draw()
 
 
     frame_request = false;
+    ClientsTCP(); ///////////////////////////////////////////////////////////////////////////////////////
   }
 }
 
@@ -185,34 +189,35 @@ void keyPressed(){
 
 void ClientsTCP(){
   
-  while(true){
+ // while(true){
     //Recieve data from clients
     c1 = s.available();
     if (c1 != null) {
-      println("Recieving data from client");
+      //println("Recieving data from client");
       input = c1.readString();
-      c1.clear();
-      println("Data from Python: " + input);
-      if (input != null){
+      c1.clear();    ////////////////////////////////////////////////////////////////////////////////////////
+      //println("Data from Python: " + input);
+      if (input != null){    ////////////////////////////////////////////////////////////////////////////////////////
         commands = split(input, '\n');
         for(int i = 0; i < commands.length; ++i){
           data = float(split(commands[i], ' '));
           if(data.length < 3){
             break;
           }
-          println(commands[i]);
-          println(data);
+          //println(commands[i]);
+          //println(data);
           int id = int(data[0]);
           model.setSpeed(data[1], data[2]);
           handler.send_velocities(model, id);
-          println("Robot: " + id);
-          println("Left  velocity: " + model.left_velocity);
-          println("Right velocity: " + model.right_velocity);
+          //println("Robot: " + id);
+          //println("Left  velocity: " + model.left_velocity);
+          //println("Right velocity: " + model.right_velocity);
         }
-      }
+      }    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }
-    //Send data to clients
+    //Send data to clients ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     s.write("s" + " " + nf(ballClass.centroidG.x,0,2) + " " + nf(ballClass.centroidG.y,0,2) + " " + nf(robotClass1.centroidG.x,0,2) + " " + nf(robotClass1.centroidG.y,0,2) + " " + nf(robotClass1.angle,0,2) + " " + nf(robotClass2.centroidG.x,0,2) + " " + nf(robotClass2.centroidG.y,0,2) + " " + nf(robotClass2.angle,0,2) + " " + nf(robotClass3.centroidG.x,0,2) + " " + nf(robotClass3.centroidG.y,0,2) + " " + nf(robotClass3.angle,0,2) + " " + nf(robotClass4.centroidG.x,0,2) + " " + nf(robotClass4.centroidG.y,0,2) + " " + nf(robotClass4.angle,0,2) + " " + nf(robotClass5.centroidG.x,0,2) + " " + nf(robotClass5.centroidG.y,0,2) + " " + nf(robotClass5.angle,0,2) + " " + nf(robotClass6.centroidG.x,0,2) + " " + nf(robotClass6.centroidG.y,0,2) + " " + nf(robotClass6.angle,0,2) + "\n\0" + " ");
-    delay(5);
-  }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    delay(100);
+ // }
 }
