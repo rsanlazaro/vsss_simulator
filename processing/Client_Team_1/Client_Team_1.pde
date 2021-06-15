@@ -18,16 +18,20 @@ void setup()
   r1 = new Robot_control(0);
   r2 = new Robot_control(1);
   r3 = new Robot_control(2);
-
-  r1.set_vel_robot(-3,1); 
-  r2.set_vel_robot(-1,0);
-  r3.set_vel_robot(0,12);
-
+  r1.set_vel_robot(0,10); 
+  r2.set_vel_robot(0,0);
+  r3.set_vel_robot(0,0);
 }
 
 void draw() 
-{
-  
+{  
+  r1.set_vel_robot(0,10); 
+  r2.set_vel_robot(0,0);
+  r3.set_vel_robot(0,0);
+  if (c1.available() > 0){
+    input = c1.readString();
+    println(input);
+  }
   //if (mousePressed == true) {
    // Vl=1.0;
     //Va=1.0;
