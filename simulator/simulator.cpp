@@ -77,7 +77,7 @@ void main(){
     bodyDef.position.Set(0.0f, 0.0f); // the body's origin position.
     bodyDef.angle = 0.0f; // the body's angle in radians.
     bodyDef.fixedRotation = true;
-    bodyDef.linearDamping = 0.1f;
+    bodyDef.linearDamping = 1.0f;
     //bodyDef.angularDamping = 0.01f;
 
     b2Body* body = world.CreateBody(&bodyDef);
